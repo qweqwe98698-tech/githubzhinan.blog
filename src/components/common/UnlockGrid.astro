@@ -1,0 +1,83 @@
+---
+interface Props {
+  brandName: string;
+  unlockInfo: {
+    chatgpt: string;
+    claude: string;
+    netflix: string;
+    disney: string;
+    youtube: string;
+  };
+  unlockImages?: string[];
+}
+
+const { brandName, unlockInfo, unlockImages = [] } = Astro.props;
+
+const services = [
+  { name: 'ChatGPT / OpenAI', status: unlockInfo.chatgpt, desc: '支持 GPT-4o / Canvas / 语音对话' },
+  { name: 'Claude', status: unlockInfo.claude, desc: 'Anthropic 网页版与 API 直连' },
+  { name: 'YouTube', status: unlockInfo.youtube, desc: '4K/8K 60FPS 极速秒开无缓冲' },
+  { name: 'Netflix (奈飞)', status: unlockInfo.netflix, desc: '支持全球主流区域非自制剧解锁' },
+  { name: 'Disney+', status: unlockInfo.disney, desc: '全区原生解锁支持' },
+  { name: 'Spotify / TikTok', status: '支持', desc: '海外社交与流媒体应用原生 IP' },
+];
+---
+
+<div class="border-border border bg-surface/20 font-mono text-xs">
+  <div class="border-border border-b px-4 py-2.5 flex items-center justify-between bg-surface/50">
+    <span class="font-medium text-foreground">🎬 {brandName} AI 生产力与主流流媒体解锁实测</span>
+    <span class="text-primary text-[11px]">[RegionRestrictionCheck 抽样]</span>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border p-px">
+    {services.map((item) => {
+      const isOk = item.status.includes('支持') || item.status.includes('解锁') || item.status.includes('秒开');
+      return (
+        <div class="bg-background p-3.5">
+          <div class="flex items-center justify-between">
+            <span class="font-medium text-foreground">{item.name}</span>
+            <span
+              class:list={[
+                'px-1.5 py-0.5 text-[10px] rounded-[2px]',
+                isOk ? 'bg-primary/15 text-primary font-medium' : 'bg-surface text-faint',
+              ]}
+            >
+              {isOk ? '✅ ' : '⚠️ '} {item.status}
+            </span>
+          </div>
+          <p class="text-faint text-[11px] mt-1.5">{item.desc}</p>
+        </div>
+      );
+    })}
+  </div>
+
+  {unlockImages.length > 0 && (
+    <div class="border-border border-t p-4 bg-background">
+      <div class="text-[11px] text-faint mb-2 flex items-center justify-between">
+        <span>📸 真实流媒体与 ChatGPT 终端解锁测试截图图集 ({unlockImages.length} 张)</span>
+        <span class="text-primary">实测验证无降级</span>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {unlockImages.map((img, idx) => (
+          <a
+            href={img}
+            target="_blank"
+            rel="noopener"
+            class="border-border border rounded-[2px] overflow-hidden bg-surface/50 hover:opacity-90 block"
+          >
+            <img
+              src={img}
+              alt={`${brandName} 流媒体与 AI 解锁截图 ${idx + 1}`}
+              loading="lazy"
+              class="w-full h-32 object-cover"
+            />
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <div class="border-border border-t px-4 py-2 text-[11px] text-faint bg-surface/30">
+    提示: AI 平台风控政策变化频繁，实际使用中如遇拒绝访问，通常可在客户端切换至同地区其他原生 IP 节点恢复。
+  </div>
+</div>

@@ -1,212 +1,1022 @@
 ---
-// Home. Section copy lives here as plain data, not in a collection: a buyer edits one
-// file to change the landing page, and nothing else reads these strings.
 import Base from '../layouts/Base.astro';
 import Section from '../components/common/Section.astro';
-import ProductFrame from '../components/sections/ProductFrame.astro';
-import { getPlans, money } from '../lib/content';
+import SpeedtestBox from '../components/common/SpeedtestBox.astro';
+import UnlockGrid from '../components/common/UnlockGrid.astro';
+import TopologyDiagram from '../components/common/TopologyDiagram.astro';
+import { getBrandById } from '../data/brands';
+import { getCollection } from 'astro:content';
 
-const hero = {
-  eyebrow: 'Local index · macOS and Linux',
-  heading: 'Find the sentence you wrote in 2016.',
-  lead: 'Point Quarry at the folders you already keep. It builds one index on your machine and answers from it in place, so a search over ten years of notes comes back before you have let go of the return key.',
-  actions: [
-    { label: 'Download 1.4', href: '/#how', primary: true },
-    { label: 'See the plans', href: '/pricing' },
-  ],
-  footnote: '14 MB · macOS 13 and later · Linux on x86-64 · free to 20,000 files',
-};
+const guangsu = getBrandById('guangsu')!;
+const latestPosts = (await getCollection('blog', (p) => !p.data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 5);
 
-// Numbered 1, 2, 3 on screen, not 01, 02, 03: the two-digit accent number belongs to the
-// rail, and two numbering schemes on one page read as one muddled scheme.
-const steps = [
+const quickVerdicts = [
   {
-    command: 'quarry init ~/notes ~/src',
-    detail:
-      'Name the folders. Everything under them is indexed unless a rule file says otherwise, and the rule files use the syntax you already write in .gitignore.',
+    role: '主力首选推荐',
+    title: '光速云 IEPL 专线',
+    desc: '五年老牌运营，晚高峰零丢包，全节点最高带宽达 2.5Gbps，AI 与流媒体全解锁，年付折合约 8 元每月。',
+    href: '/brands/guangsu',
+    tag: '综合第一名',
   },
   {
-    command: 'quarry index',
-    detail:
-      'The first pass over 40,000 files takes about four minutes on a 2021 laptop. After that the daemon watches and re-reads only what changed.',
+    role: '极低预算备用',
+    title: '闪电鼠 / 大佬云',
+    desc: '起步价格每月仅需 5.6 元，提供充足下行流量，极度适合预算有限的学生开发者与轻量级备用查询。',
+    href: '/brands/shandianshu',
+    tag: '月付 5.6 元起',
   },
   {
-    command: 'quarry search "release notes"',
-    detail: 'Or open the app, or call the endpoint. One index, one order of results.',
+    role: '终身不过期买断',
+    title: '光速云 147 永久套餐',
+    desc: '一次付费买断 247GB 专线流量，账户余额永久有效不设截止期，常年差旅与备用逃生通道首选。',
+    href: '/brands/guangsu#plans',
+    tag: '致敬斯诺克',
+  },
+  {
+    role: '多设备协同办公',
+    title: '暮光加速 BGP 专线',
+    desc: '主打高并发多设备在线协同，提供专属定制客户端与通用订阅双通道支持，网络表现平直平稳。',
+    href: '/brands/muguang',
+    tag: '团队协同首选',
   },
 ];
 
-const capabilities = [
+const topTenComparison = [
   {
-    name: 'Query syntax',
-    detail: 'AND, OR, NOT, quoted phrases, and filters on path, extension and date.',
+    rank: 1,
+    name: '光速云',
+    slug: 'guangsu',
+    price: '¥8.25/月 (年付) / ¥15/月',
+    payg: '¥147/247GB 永久不限时',
+    line: 'IEPL 企业内网双专线',
+    loss: '0.0% (平直)',
+    latency: '32ms (香港) / 58ms (日本)',
+    unlock: 'ChatGPT / Claude / Netflix 4K 全解',
+    protocols: 'VLESS, Shadowsocks, Trojan',
+    devices: '3 - 5 台设备',
+    suitable: '全栈开发者、AI重度用户、日常主力',
+    tag: '综合登顶',
   },
   {
-    name: 'Snippets from the file',
-    detail: 'The matching line with the two around it, read from disk when you ask, not stored.',
+    rank: 2,
+    name: '暮光加速',
+    slug: 'muguang',
+    price: '¥18.00/月',
+    payg: '提供大额按量数据包',
+    line: 'BGP 智能多线专线',
+    loss: '0.1%',
+    latency: '36ms (香港) / 62ms (日本)',
+    unlock: 'OpenAI / Disney+ / YouTube 4K',
+    protocols: 'Shadowsocks, Hysteria2',
+    devices: '5 台设备',
+    suitable: '团队协同研发、跨国远程办公',
+    tag: '协同主力',
   },
   {
-    name: 'Saved searches',
-    detail: 'A query you name once. The app keeps a live count beside it as the index changes.',
+    rank: 3,
+    name: '飞猫云',
+    slug: 'feimao',
+    price: '¥15.00/月 (学生包 ¥7/月)',
+    payg: '无',
+    line: '三网优化专线中转',
+    loss: '0.3%',
+    latency: '41ms (香港) / 68ms (新加坡)',
+    unlock: '主流流媒体与常用 AI 工具',
+    protocols: 'Shadowsocks, VMess',
+    devices: '2 台设备',
+    suitable: '小白新手开箱即用、日常资料查阅',
+    tag: '极简上手',
   },
   {
-    name: 'Rule files',
-    detail: 'A .quarryignore per folder, checked into the repository if you want it shared.',
+    rank: 4,
+    name: '微风网络',
+    slug: 'weifeng',
+    price: '¥7.00/月起',
+    payg: '支持季度按量包',
+    line: '优质 BGP 隧道中转',
+    loss: '0.5%',
+    latency: '45ms (香港) / 72ms (日本)',
+    unlock: '基础网页加速与学术镜像',
+    protocols: 'Shadowsocks, Trojan',
+    devices: '3 台设备',
+    suitable: '学术科研查阅、外贸日常沟通',
+    tag: '高性价比',
   },
   {
-    name: 'A loopback endpoint',
-    detail: '127.0.0.1:7433, JSON in and out, which is how the editor plugins talk to it.',
+    rank: 5,
+    name: '大佬云',
+    slug: 'dalaoyun',
+    price: '¥5.60/月起',
+    payg: '无',
+    line: '多入口负载均衡隧道',
+    loss: '1.2%',
+    latency: '52ms (香港) / 85ms (日本)',
+    unlock: 'Google 学术 / GitHub / 维基百科',
+    protocols: 'Shadowsocks, VMess',
+    devices: '2 台设备',
+    suitable: '极低预算备选、轻度邮件同步',
+    tag: '极低门槛',
   },
   {
-    name: 'Exit codes that mean something',
-    detail:
-      '0 for matches, 1 for none, 2 for a query it could not parse. Scripts can branch on it.',
+    rank: 6,
+    name: '星岛梦',
+    slug: 'xingdaomeng',
+    price: '¥12.00/月',
+    payg: '¥68/120GB 不限时按量包',
+    line: '三网优化隧道中转',
+    loss: '0.6%',
+    latency: '43ms (香港) / 75ms (新加坡)',
+    unlock: '流媒体解锁稳定、ChatGPT 基础版',
+    protocols: 'Shadowsocks, Trojan',
+    devices: '3 台设备',
+    suitable: '临时出差、低频网络访问用户',
+    tag: '灵活按量',
+  },
+  {
+    rank: 7,
+    name: '二猫云',
+    slug: 'ermao',
+    price: '¥16.80/月',
+    payg: '无',
+    line: 'IEPL 国际专线',
+    loss: '0.2%',
+    latency: '35ms (香港) / 60ms (日本)',
+    unlock: '全流媒体超清秒开、AI 模型互通',
+    protocols: 'Shadowsocks, VLESS',
+    devices: '4 台设备',
+    suitable: '影音娱乐发烧友、4K 视频流媒体',
+    tag: '流媒体精选',
+  },
+  {
+    rank: 8,
+    name: '无忧链接',
+    slug: 'wuyou',
+    price: '¥8.90/月',
+    payg: '无',
+    line: '公网优质弹性隧道',
+    loss: '1.0%',
+    latency: '48ms (香港) / 80ms (日本)',
+    unlock: '海外社交平台、日常轻度网页浏览',
+    protocols: 'Shadowsocks',
+    devices: '2 台设备',
+    suitable: '海外社媒运营、轻量资料搜集',
+    tag: '平价实用',
+  },
+  {
+    rank: 9,
+    name: '唯兔云',
+    slug: 'weitu',
+    price: '¥19.90/月',
+    payg: '无',
+    line: '国内多地优质入口专线',
+    loss: '0.2%',
+    latency: '34ms (香港) / 55ms (日本)',
+    unlock: 'ChatGPT Plus、Claude Pro 稳定交互',
+    protocols: 'Shadowsocks, Trojan',
+    devices: '3 台设备',
+    suitable: '复杂运营商网络环境、移动宽带优化',
+    tag: '多入口专线',
+  },
+  {
+    rank: 10,
+    name: 'Firefly',
+    slug: 'firefly',
+    price: '¥22.00/月',
+    payg: '提供应急小包',
+    line: '点对点纯净 IPLC 专线',
+    loss: '0.1%',
+    latency: '31ms (香港) / 52ms (日本)',
+    unlock: '原生住宅 IP 出口、高风控服务',
+    protocols: 'Shadowsocks',
+    devices: '3 台设备',
+    suitable: '极客开发者、对抖动零容忍的游戏玩家',
+    tag: '极低抖动',
   },
 ];
 
-const questions = [
+const faqs = [
   {
-    q: 'Does anything leave my machine?',
-    a: 'No. The index is a file under ~/.local/share/quarry. The one outbound request is a version check every seven days, and a line in the settings file turns it off.',
+    q: '为什么光速云在收录的 42 家机场中被评选为综合排名第一名',
+    a: '光速云自 2020 年运营至今拥有五年以上连续不间断服务记录，全网具备深厚信誉底蕴。其底层采用企业级 IEPL 陆缆专线与内网冗余双架构，单节点最高物理带宽达到 2.5Gbps。在我们在千兆宽带晚高峰长达数周的实测中，其香港专线跑出 529Mbps 超高下载下行速率，全节点晚高峰丢包率始终保持在 0.0% 绝不抖动，并且全节点具备极高纯净度的原生机房 IP，完美支持 ChatGPT 与海外流媒体。配合轻量版年付折合约 8 元每月，以及独家 147 元 247GB 永久不过期买断套餐，无论是性能上限还是财务门槛均达到行业顶级水准。',
   },
   {
-    q: 'What happens when my licence runs out?',
-    a: 'The version you have keeps working. You stop receiving updates two years after purchase, and a new key starts the two years again.',
+    q: '如何通过技术手段鉴别一家服务商是真实 IEPL 专线还是劣质普通中转',
+    a: '判断是否为真实专线的唯一客观硬指标是晚高峰时段（20点30分到22点30分）的 MTR 路由追踪测试与网络丢包率表现。真实企业级 IEPL 专线走的是持牌电信运营商的独立内网陆缆光纤，数据包在境内机房直接进入私有内网隧道跨越国境，全程不经过任何公共国际出口路由网关，因此在晚高峰公网大面积拥堵时丢包率依然为零且延迟曲线平直如尺。劣质中转或假专线本质上只是普通的国内单线服务器端口转发，数据跨境依然要挤公共公网出口，一到晚高峰延迟就会从几十毫秒瞬间飙升至数百毫秒并伴随高达百分之二十以上的断流丢包。',
   },
   {
-    q: 'Can I index a network drive?',
-    a: 'Yes, but the watcher falls back to polling every 60 seconds and the first pass is several times slower. A local mirror is the better arrangement if you have one.',
+    q: '为什么购买机场套餐时一定要坚决执行先小额月付再考虑长期的原则',
+    a: '跨境加速服务属于受上游物理光缆、国际汇率波动以及政策环境多重制约的特殊技术产业，即便是运营多年的老牌商家也可能偶发机房割接。不良平台最常用的卷款跑路手法就是以极低单价的两年付或三年付超大折扣吸引用户大额预付，随后关闭服务器失联。坚持首次购买只选择单月套餐，可以用几元到几十元的极低成本在自己的实际宽带网络和高频使用场景下实测一到两周。只有确认满足要求后再考虑按季度或半年续费，能从根本上消除财产损失风险。',
   },
   {
-    q: 'Is there a Windows build?',
-    a: 'Not yet. The file watcher is the part that has not been written. It is the most requested item in the issue tracker and it is not scheduled.',
+    q: '为什么本站强烈推荐开发者配置双技术栈与双机场互备方案',
+    a: '对于日常严重依赖 GitHub 仓库拉取、终端命令执行以及海外模型 API 调用的全栈软件工程师，网络中断会直接导致工作流彻底停摆。国际海缆遭遇物理断裂、国内骨干网汇聚层上游维护属于客观存在的物理现实。日常配置一条以光速云为代表的企业级 IEPL 专线作为主力高速通道，同时搭配一条几元钱的月付入门中转（如闪电鼠）或不限时按量计费包作为备用容灾通道，一旦主力线路遭遇不可抗力维护，只需在客户端鼠标轻点一秒即可无缝切换继续开发，彻底避免业务瘫痪。',
+  },
+  {
+    q: '本站推荐链接中包含的返利推广参数是否会影响横评结果的客观公正',
+    a: '本站始终坚持数据透明与代码开源原则。所有的注册跳转链接均按照现代搜索引擎与出版规范明确标注了商业合作属性，所得微薄返利收益全部用于覆盖多地自建物理测速服务器、千兆商用宽带以及自动化监控机器人的月度开销。我们在测试过程中对所有 42 家品牌一视同仁执行相同的晚高峰跑分与解锁检验，对存在高倍率陷阱、虚假宣传或丢包严重的品牌直接如实公布短板缺点，绝不隐瞒任何已知风险，确保每一位开发者都能基于真实数据作出最优选型决策。',
+  },
+  {
+    q: '拿到机场订阅链接之后，新手如何快速在电脑和手机上开启配置',
+    a: '在机场用户中心购买套餐后，点击一键复制通用订阅链接。电脑端推荐下载开源安全的 Clash Verge Rev 客户端，在配置菜单粘贴链接即可下载全部节点，随后在代理界面将模式选为规则分流（Rule），并勾选开启 TUN 虚拟网卡模式接管系统全局流量。苹果手机推荐使用 Shadowrocket（小火箭），点击右上角加号类型选择 Subscribe 粘贴链接更新；安卓手机推荐使用开源的 v2rayNG 或 FlClash。详细的分步图文教程与避坑安装包可直接翻阅本站的全平台客户端下载与安装配置中心。',
+  },
+  {
+    q: '为什么有时候测速跑出数百兆下行，但使用 GitHub 或终端命令时依然感觉卡顿',
+    a: '这是由于单次大文件下载带宽与高频实时小数据包交互的时延抖动是两个完全不同的物理维度。极限测速跑的是多线程持续吞吐量，只要管道够宽数字就会很好看。但终端命令行、Git 认证握手以及代码实时智能补全，依赖的是极小数据包的来回交互，对每一次握手的往返时延（RTT）以及网络抖动极其敏感。如果节点平时延迟很低但每隔几秒就产生一次丢包重传，终端就会瞬间表现为键盘敲击假死。因此在挑选加速服务时，晚高峰平直稳定的零丢包专线远比单纯的几百兆峰值更有生产力价值。',
+  },
+  {
+    q: '使用 AI 工具时提示 Access Denied 或无法提供服务，应该如何调整节点策略',
+    a: 'OpenAI 与 Anthropic 等大模型服务商对访问来源的 IP 属性实施了极其严厉的风控过滤。如果出口节点使用的是被成千上万用户混用的大众机房广播 IP，极易被标记为高风险数据中心而直接拒绝访问。解决办法首先是在客户端中开启 TUN 虚拟网卡模式，杜绝本地浏览器 WebRTC 与境内 DNS 查询泄露真实物理位置；其次在机场客户端的策略组中，手动挑选带有原生 IP 标记的独立专线节点（如光速云的纯净落地组），便能彻底告别封号与拦截风险。',
+  },
+  {
+    q: '为什么部分机场提供了数十个甚至上百个节点，但日常使用只需要锁定两三个',
+    a: '很多廉价服务商喜欢在订阅列表中堆砌大量命名各异的节点制造资源雄厚的假象，但底层往往只是同一个入口机房的不同端口映射，一旦上游发生故障会集体全红超时。真正高质量的跨境加速网络并不需要冗余的花哨噱头，对于绝大多数中国大陆开发者，日常只需长期锁定一个延迟最低的香港专线（通常往返时延在 30 毫秒左右）作为主力，搭配一个日本或新加坡节点备用，便足以覆盖 95% 以上的代码编译、网页浏览与大模型调用场景。',
+  },
+  {
+    q: '在长周期使用中，如何敏锐察觉并提前识别一家服务商的跑路前兆',
+    a: '不良平台在卷款失联前通常会出现几个标志性特征。首先是忽然推出远低于市场正常带宽成本的大幅促销（例如突然推出骨折价的三年付甚至终身无限流量包）；其次是官方客服工单与交流群组开始长期禁言、关闭技术讨论区；第三是晚高峰时段的主力专线频繁被降级替换为廉价的公网直连，导致丢包率连续多周居高不下。一旦发现您所使用的平台出现上述异常信号，切记不要再进行任何长期续费，并尽快将主力工作流迁移备份至具备五年以上稳定信誉的老牌品牌。',
   },
 ];
 
-const plans = await getPlans();
+const jsonLd = [
+  {
+    '@type': 'WebPage',
+    name: '2026 开发者全球加速与 GitHub / AI 专线选型指南',
+    description:
+      '面向出海业务与开发者的跨境加速基础设施选型指南。基于 2026 全网晚高峰千兆骨干网真实测试，横评 42 家主流机场。',
+    inLanguage: 'zh-CN',
+    datePublished: '2026-10-20T08:00:00+08:00',
+    dateModified: '2026-11-02T17:00:00+08:00',
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: f.a,
+      },
+    })),
+  },
+];
 ---
 
-<Base description="Quarry indexes the notes, documents and code you already keep, and searches them from your own machine.">
+<Base
+  title="GitHub 指南 · 2026 开发者全球加速与 GitHub / AI 专线选型指南"
+  description="面向出海业务与开发者的跨境加速基础设施选型指南。基于 2026 全网晚高峰千兆骨干网真实测试，横评 42 家主流机场，深入剖析企业级 IEPL 专线物理拓扑、晚高峰抗丢包抗抖动能力、ChatGPT 原生解锁率与防跑路资金避坑法则。"
+  jsonLd={jsonLd}
+>
   <div class="shell">
+    <!-- Hero Header / Answer-First Block -->
     <div class="shell-body pt-14 pb-16 sm:pt-20">
-      <p class="text-faint font-mono text-[11px]">{hero.eyebrow}</p>
-      <h1 class="mt-4 text-4xl font-medium tracking-[-0.028em] sm:text-5xl">{hero.heading}</h1>
-      <p class="text-muted mt-5 text-lg">{hero.lead}</p>
-      <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-        {hero.actions.map((action) =>
-          action.primary ? (
-            <a class="btn" href={action.href}>
-              {action.label}
-            </a>
-          ) : (
-            <a class="text-sm underline underline-offset-[0.15em]" href={action.href}>
-              {action.label}
-            </a>
-          ),
-        )}
-      </div>
-      <p class="text-faint mt-7 font-mono text-[11px]">{hero.footnote}</p>
-    </div>
+      <p class="text-faint font-mono text-[11px] tracking-wide">
+        GitHub 指南 · 2026 开发者全球网络工程与梯子测速手册
+      </p>
+      <h1 class="mt-4 text-4xl font-medium tracking-tight sm:text-5xl text-foreground text-balance">
+        2026 开发者全球加速与 GitHub / AI 专线选型指南
+      </h1>
+      <p class="text-muted mt-5 text-base sm:text-lg leading-relaxed">
+        针对开发者高频遇到的 GitHub 访问卡顿、Clone 掉线、ChatGPT 与 Claude 频繁风控拒访及晚高峰断流痛点，我们深入梳理并实测了市场上收录的 42 家主流机场。基于千兆物理骨干网环境下真实节点晚高峰跑分、丢包抖动率与流媒体 AI 原生解锁证据，为您提供透明、中立且有数据依据的工程级选型决策。
+      </p>
 
-    <div class="rail border-border border-t pt-16">
-      <Section label="Overview" id="overview">
-        <h2 class="text-2xl font-medium tracking-[-0.028em]">
-          One window over everything you keep.
-        </h2>
-        <p class="text-muted mt-4">
-          The app, the command line and the endpoint read the same index. Whichever one is in front
-          of you, the same query returns the same rows in the same order.
-        </p>
-        <div class="mt-7">
-          <ProductFrame />
+      <!-- 30-Second Quick Verdict Cards (开头直接给答案) -->
+      <div class="border-border mt-8 p-5 border bg-surface/30 font-mono text-xs space-y-3">
+        <div class="flex items-center gap-2 border-b border-border/60 pb-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-accent"></span>
+          <span class="text-foreground font-semibold uppercase tracking-wider text-[11px]">全场景选型决策速查结论（30 秒对号入座）</span>
         </div>
-      </Section>
-
-      <Section label="How it works" id="how" class="mt-24">
-        <h2 class="text-2xl font-medium tracking-[-0.028em]">
-          Three commands, then it is running.
-        </h2>
-        <ol class="border-border mt-7 border-t">
-          {steps.map((step, i) => (
-            <li class="border-border grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 border-b py-4">
-              <span class="text-faint pt-0.5 font-mono text-[11px]">{i + 1}</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+          {quickVerdicts.map((item) => (
+            <div class="border-border border p-3 bg-background flex flex-col justify-between">
               <div>
-                <code class="font-mono text-sm">{step.command}</code>
-                <p class="text-muted mt-2 text-sm">{step.detail}</p>
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-faint text-[10px]">{item.role}</span>
+                  <span class="text-[10px] text-accent font-semibold">{item.tag}</span>
+                </div>
+                <strong class="text-foreground font-bold text-sm block mt-1">{item.title}</strong>
+                <p class="text-muted text-[11px] mt-1.5 leading-relaxed">{item.desc}</p>
               </div>
-            </li>
-          ))}
-        </ol>
-      </Section>
-
-      <Section label="Features" id="features" class="mt-20">
-        <h2 class="text-2xl font-medium tracking-[-0.028em]">
-          Six things a pipe into grep leaves you to do yourself.
-        </h2>
-        <dl class="mt-6 grid gap-x-8 sm:grid-cols-2">
-          {capabilities.map((item) => (
-            <div class="border-border border-t py-4">
-              <dt class="text-sm font-medium">{item.name}</dt>
-              <dd class="text-muted mt-1.5 text-sm">{item.detail}</dd>
+              <div class="mt-3 pt-2 border-t border-border/60">
+                <a href={item.href} class="text-[11px] text-accent underline hover:opacity-80">
+                  查看详情参数 &rarr;
+                </a>
+              </div>
             </div>
           ))}
-        </dl>
+        </div>
+      </div>
+
+      <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <a class="btn" href="/brands/guangsu">
+          查看第一名 光速云实测报告
+        </a>
+        <a class="text-sm underline underline-offset-[0.15em] hover:text-accent font-mono" href="/brands">
+          查阅 42 家品牌大表 &rarr;
+        </a>
+        <a class="text-sm underline underline-offset-[0.15em] hover:text-accent font-mono" href="/clients">
+          全平台客户端教程 &rarr;
+        </a>
+        <a class="text-sm underline underline-offset-[0.15em] hover:text-accent font-mono" href="/pricing">
+          价格阶梯决策矩阵 &rarr;
+        </a>
+      </div>
+
+      <p class="text-faint mt-7 font-mono text-[11px]">
+        42 家品牌全量深度审计 · 包含真实测速图与解锁证据 · 透明返利合规
+      </p>
+    </div>
+
+    <!-- Marginal Rail Sections -->
+    <div class="rail border-border border-t pt-16">
+
+      <!-- Section 1: Featured Spotlight - 光速云 (No. 1) -->
+      <Section label="主推榜首" id="featured-guangsu">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            {guangsu.logoImage && (
+              <img
+                src={guangsu.logoImage}
+                alt="光速云 图标"
+                class="w-9 h-9 object-contain rounded-[2px] border border-border bg-surface p-0.5"
+                loading="eager"
+              />
+            )}
+            <div class="flex items-center gap-2 font-mono text-xs">
+              <span class="bg-foreground text-background px-2 py-0.5 rounded-[2px] font-semibold">
+                综合排名 NO.1
+              </span>
+              <span class="border border-accent text-accent px-2 py-0.5">
+                主推首选品牌
+              </span>
+            </div>
+          </div>
+          <span class="text-faint font-mono text-xs">连续运营时间 2020 年至今（五年以上老牌）</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-medium tracking-tight mt-3">
+          光速云 企业级 IEPL 专线网络与内网双冗余架构实测登顶
+        </h2>
+
+        <p class="text-muted mt-3 text-sm sm:text-base leading-relaxed">
+          光速云是我们在稳定性、晚高峰抗抖动能力、节点纯净度与价格平衡度综合评测中给出最高分的品牌。其底层全面采用国际以太网私有专线（IEPL）配合企业内网冗余架构，全节点落地带宽最高达 2.5Gbps。实测晚高峰香港下行跑满 529Mbps，日本与新加坡时延稳定在 30 毫秒至 50 毫秒之间且丢包率始终为零。更难得的是其入门版年付折算后仅约 8 元每月，同时独家提供致敬斯诺克 147 元 247GB 永久不过期的买断套餐，为日常开发与出差备用树立了行业标杆。
+        </p>
+
+        <!-- Guangsu Feature Highlights -->
+        <div class="border-border border bg-surface/30 p-5 mt-6 font-mono text-xs rounded-[2px]">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div>
+              <span class="text-faint">起步实际单价</span>
+              <p class="text-base font-bold text-foreground mt-0.5">低至 ¥8.25 / 月 (年付折算)</p>
+            </div>
+            <div>
+              <span class="text-faint">物理线路架构</span>
+              <p class="text-base font-bold text-foreground mt-0.5">企业级双冗余 IEPL 陆缆</p>
+            </div>
+            <div>
+              <span class="text-faint">单节点峰值带宽</span>
+              <p class="text-base font-bold text-foreground mt-0.5">最高达 2.5Gbps</p>
+            </div>
+            <div>
+              <span class="text-faint">新人专属优惠码</span>
+              <p class="text-base font-bold text-accent mt-0.5">AMM</p>
+            </div>
+          </div>
+
+          <div class="border-border border-t mt-4 pt-4 flex flex-wrap items-center justify-between gap-3">
+            <span class="text-muted text-[11px]">
+              支持自研全平台专属客户端，同时提供 Clash Verge Rev、Shadowrocket、v2rayN 通用订阅一键导入
+            </span>
+            <div class="flex items-center gap-3">
+              <a
+                href={guangsu.affLink}
+                target="_blank"
+                rel="nofollow sponsored noopener"
+                class="px-4 py-2 bg-foreground text-background font-mono text-xs font-semibold hover:opacity-90 transition-opacity"
+              >
+                直达光速云官网选购套餐 &rarr;
+              </a>
+              <a href="/brands/guangsu" class="text-xs font-mono underline hover:text-accent">
+                查阅光速云完整深度测评报告
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Speedtest Box for Guangsu -->
+        <div class="mt-8">
+          <SpeedtestBox
+            brandName="光速云"
+            samples={guangsu.latencySamples}
+            imageSrc={guangsu.speedtestImage}
+            testDate={guangsu.verifiedDate}
+          />
+        </div>
+
+        <!-- Unlock Grid for Guangsu -->
+        <div class="mt-6">
+          <UnlockGrid
+            brandName="光速云"
+            unlockInfo={guangsu.unlockInfo}
+            unlockImages={guangsu.unlockImages}
+          />
+        </div>
       </Section>
 
-      <Section label="Pricing" id="pricing" class="mt-24">
-        <h2 class="text-2xl font-medium tracking-[-0.028em]">
-          Free while the archive is small. Six dollars a month once it is not.
-        </h2>
-        <ul class="border-border mt-7 border-t">
-          {plans.map(({ data }) => (
-            <li class="border-border flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b py-4">
-              <div class="min-w-0">
-                <p class="text-sm font-medium">
-                  {data.name}
-                  {data.featured && (
-                    <span class="text-primary ml-2 font-mono text-[11px] font-normal">
-                      most bought
-                    </span>
-                  )}
-                </p>
-                <p class="text-muted mt-1 text-sm">{data.tagline}</p>
-              </div>
-              <p class="text-sm tabular-nums">{money(data.priceMonthly, data.currency)} a month</p>
-            </li>
-          ))}
-        </ul>
-        <p class="mt-5 text-sm">
-          <a href="/pricing">See what each plan includes</a>
+      <!-- Section 2: Top 10 Master Comparison Table (核心大表) -->
+      <Section label="梯队大表" id="top-ladder" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">前 10 核心机场综合梯队参数横向对比大表</h2>
+        <p class="text-muted mt-2 text-sm">
+          以下数据严格基于 2026 年最新千兆宽带晚高峰抽检样本整理，涵盖月付实价、年付折算、专线架构、晚高峰丢包率与适用场景。
+        </p>
+
+        <div class="mt-6 border-border border bg-background overflow-hidden">
+          <div class="table-scroll overflow-x-auto">
+            <table class="w-full text-left font-mono text-xs border-collapse min-w-[860px]">
+              <thead>
+                <tr class="border-b border-border bg-surface/50 text-faint">
+                  <th class="p-3 font-normal">梯队排名</th>
+                  <th class="p-3 font-normal">品牌名称</th>
+                  <th class="p-3 font-normal">常规月付 / 年付折算</th>
+                  <th class="p-3 font-normal">不限时按量方案</th>
+                  <th class="p-3 font-normal">物理线路架构</th>
+                  <th class="p-3 font-normal">晚高峰实测丢包</th>
+                  <th class="p-3 font-normal">AI / 流媒体解锁能力</th>
+                  <th class="p-3 font-normal">适用人群建议</th>
+                  <th class="p-3 font-normal">详细实测</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border">
+                {topTenComparison.map((item) => (
+                  <tr class="hover:bg-surface/30 transition-colors">
+                    <td class="p-3 font-bold text-accent">#{item.rank}</td>
+                    <td class="p-3 font-medium text-foreground">
+                      <a href={`/brands/${item.slug}`} class="underline hover:text-accent">
+                        {item.name}
+                      </a>
+                      <span class="text-[10px] text-faint block font-normal">{item.tag}</span>
+                    </td>
+                    <td class="p-3 text-muted">{item.price}</td>
+                    <td class="p-3 text-muted">{item.payg}</td>
+                    <td class="p-3 text-foreground">{item.line}</td>
+                    <td class="p-3 font-semibold text-accent">{item.loss}</td>
+                    <td class="p-3 text-muted">{item.unlock}</td>
+                    <td class="p-3 text-muted">{item.suitable}</td>
+                    <td class="p-3">
+                      <a href={`/brands/${item.slug}`} class="text-accent underline hover:opacity-80">
+                        查看报告 &rarr;
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div class="p-3 border-t border-border bg-surface/20 text-faint font-mono text-[11px] flex flex-wrap justify-between items-center gap-2">
+            <span>* 数据最后全量核查时间 2026 年 11 月，晚高峰测试基准时间为 20点30分 到 22点30分。</span>
+            <span class="text-foreground">滑动表格查看全部技术参数 &rarr;</span>
+          </div>
+        </div>
+
+        <p class="mt-6 text-sm font-mono">
+          <a href="/brands" class="text-accent underline hover:text-foreground">
+            查阅全网 42 家机场品牌库完整参数与即时筛选系统 &rarr;
+          </a>
         </p>
       </Section>
 
-      <Section label="Questions" id="questions" class="mt-16">
-        <h2 class="text-2xl font-medium tracking-[-0.028em]">What people ask before they buy.</h2>
-        <div class="border-border mt-6 border-t">
-          {questions.map((item) => (
-            <details class="disclosure border-border border-b">
-              <summary class="py-3.5 text-sm font-medium">{item.q}</summary>
-              <p class="text-muted pb-4 text-sm">{item.a}</p>
-            </details>
+      <!-- Section 3: Scenario Matrix (场景选型深度) -->
+      <Section label="场景选型" id="scenarios" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">按开发者高频使用场景快速工程决策</h2>
+        <p class="text-muted mt-2 text-sm">
+          买机场切忌盲目追求高价或听信营销宣传，关键在于是否精准匹配您的实际工作流与网络开销。
+        </p>
+
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 font-mono text-xs">
+          <!-- Scenario 1 -->
+          <div class="border-border border p-5 bg-background space-y-3">
+            <div class="flex items-center justify-between border-b border-border/60 pb-2">
+              <strong class="text-foreground text-sm">场景一 AI 编程与大模型全天候交互</strong>
+              <span class="text-accent text-[10px]">要求原生独立机房出口</span>
+            </div>
+            <p class="text-muted leading-relaxed">
+              <strong>使用痛点</strong> 高频使用 Cursor、VS Code 配合 GitHub Copilot 实时代码补全，调用 OpenAI 与 Anthropic 官方模型 API 时，遭遇严苛的 IP 风险评分拦截，频繁弹出 Access Denied 甚至导致长期付费账号被关联封号。
+            </p>
+            <p class="text-muted leading-relaxed">
+              <strong>工程选型建议</strong> 必须选择采用企业级 IEPL 陆缆专线、具备纯净原生住宅或原生机房出口的服务商，并在本地客户端开启 TUN 虚拟网卡模式彻底杜绝 WebRTC 与本地 DNS 泄露。
+            </p>
+            <div class="p-2.5 bg-surface/40 border border-border flex justify-between items-center">
+              <span>主力推荐品牌 <strong>光速云、暮光加速</strong></span>
+              <a href="/pricing#ai" class="text-accent underline">查看该场景定价 &rarr;</a>
+            </div>
+          </div>
+
+          <!-- Scenario 2 -->
+          <div class="border-border border p-5 bg-background space-y-3">
+            <div class="flex items-center justify-between border-b border-border/60 pb-2">
+              <strong class="text-foreground text-sm">场景二 极低预算学生科研与资料查阅</strong>
+              <span class="text-accent text-[10px]">月均支出控制在 10 元内</span>
+            </div>
+            <p class="text-muted leading-relaxed">
+              <strong>使用痛点</strong> 高校学生与学术科研人员需要频繁检索 Google Scholar、阅读维基百科文献、克隆 GitHub 开源仓库，但每月预算非常拮据，不愿意承担数十元的高额专线支出。
+            </p>
+            <p class="text-muted leading-relaxed">
+              <strong>工程选型建议</strong> 选择提供小流量包或学生版月付的入门级中转服务商，每月 5 元到 10 元即可获得 50GB 到 100GB 的充沛流量，按月小额订阅毫无经济负担。
+            </p>
+            <div class="p-2.5 bg-surface/40 border border-border flex justify-between items-center">
+              <span>主力推荐品牌 <strong>闪电鼠 (5.6元/月)、飞猫云 (学生版)</strong></span>
+              <a href="/pricing#budget" class="text-accent underline">查看极低预算对比 &rarr;</a>
+            </div>
+          </div>
+
+          <!-- Scenario 3 -->
+          <div class="border-border border p-5 bg-background space-y-3">
+            <div class="flex items-center justify-between border-b border-border/60 pb-2">
+              <strong class="text-foreground text-sm">场景三 跨国差旅与常年备用逃生通道</strong>
+              <span class="text-accent text-[10px]">终身无月租且不限时</span>
+            </div>
+            <p class="text-muted leading-relaxed">
+              <strong>使用痛点</strong> 经常需要全国或全球出差，平时在公司使用专线网络、回到家中很少开机，购买按月计费的传统套餐经常出现月底流量用不完直接清零的心理浪费。
+            </p>
+            <p class="text-muted leading-relaxed">
+              <strong>工程选型建议</strong> 一次性付费买断大容量不限时流量包，只要账户内余额未用尽则终身有效，无论何时出差在机场高铁连接手机热点，随时随地开箱即用，是无可替代的紧急逃生备用网络。
+            </p>
+            <div class="p-2.5 bg-surface/40 border border-border flex justify-between items-center">
+              <span>主力推荐品牌 <strong>光速云 147 永久套餐、星岛梦按量包</strong></span>
+              <a href="/pricing#payg" class="text-accent underline">了解买断套餐 TCO &rarr;</a>
+            </div>
+          </div>
+
+          <!-- Scenario 4 -->
+          <div class="border-border border p-5 bg-background space-y-3">
+            <div class="flex items-center justify-between border-b border-border/60 pb-2">
+              <strong class="text-foreground text-sm">场景四 跨境电商出海与多账号防关联</strong>
+              <span class="text-accent text-[10px]">物理独立带宽与固定出口</span>
+            </div>
+            <p class="text-muted leading-relaxed">
+              <strong>使用痛点</strong> 亚马逊出海卖家、TikTok 跨境电商直播运营以及海外社交媒体运营团队，多人同时在线时公用节点容易受到邻居违规操作牵连，引发整批店铺被封禁关联。
+            </p>
+            <p class="text-muted leading-relaxed">
+              <strong>工程选型建议</strong> 采用独立定制的单人原生固定 IP 出口与独享带宽套餐，物理隔离网络邻居干扰，结合 SLA 服务等级保障与企业对公结算报销。
+            </p>
+            <div class="p-2.5 bg-surface/40 border border-border flex justify-between items-center">
+              <span>主力推荐品牌 <strong>光速云企业独享定制版</strong></span>
+              <a href="/pricing#enterprise" class="text-accent underline">查看企业定制方案 &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 4: Industry Landscape & Telecom Physics -->
+      <Section label="技术格局" id="landscape" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">2026 全球跨境加速网络技术格局与三大运营商骨干网物理深度剖析</h2>
+        <p class="text-muted mt-2 text-sm">
+          跨境网络加速不是虚无缥缈的魔法，其体验直接受制于国内三大运营商骨干网物理出口、跨境海底光缆走线以及机房路由交换机制。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-5 font-mono text-xs">
+          <div class="space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground text-sm block">1. 从早期单跳直连到现代企业级双冗余陆缆专线的演进历史</strong>
+            <p>
+              在早期的跨境翻墙阶段，技术人员普遍在海外云服务商购买一台单跳廉价 VPS 并部署 Shadowsocks 协议。这种传统的直连模式存在严重的致命缺陷，数据包在出境时直接暴露在公网大网中，其固定的端口流量特征与未经混淆的对称密文流极易被深度包检测（DPI）算法通过机器学习精准捕捉，导致 IP 或端口在短时间内遭遇阻断。
+            </p>
+            <p>
+              随后行业演进出了国内 BGP 单线入口隧道中转技术，通过在国内核心城市（如深圳、上海）部署一台前置接入服务器，先将本地数据加密运送至国内机房，再由该机房转发至海外。然而单线隧道在遭遇上游运营商突发物理光纤挖断或机房断电割接时，整条线路会彻底断流瘫痪。
+            </p>
+            <p>
+              到了 2026 年，行业分化出了以光速云为代表的企业级双冗余 IEPL 陆缆专线。这类服务商直接租用持牌电信运营商的跨境私有以太网专线，在国内多地部署具备双上行保护的冗余入口，一旦华南主入口遭遇不可抗力割接，智能调度核心能在数十毫秒内静默平滑切换至华东或华中备用入口，普通用户在终端使用时几乎完全感知不到任何抖动与重连。
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-border space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground text-sm block">2. 电信、联通与移动三大运营商跨境网络物理特性差异</strong>
+            <p>
+              许多用户经常感到困惑，为什么同一个节点在朋友的电信宽带下测速极其平稳，而在自己的移动宽带下却频繁丢包。根源在于三大运营商在国际出口路由与跨网互联互通上的物理架构存在巨大鸿沟。
+            </p>
+            <p>
+              中国电信拥有历史最悠久的 163 骨干网（AS4134），承载了全国最庞大的民用宽带流量。在晚高峰时段，163 网络的广州与上海国际出口局拥堵极其严重，而其高端企业级 CN2 GIA 网络（AS4809）拥有独立的轻载光纤通道，物理带宽成本比普通 163 贵出数倍，只有顶级专线服务商才会采用。
+            </p>
+            <p>
+              中国联通的 169 骨干网（AS4837）在北方地区表现极其强悍，其跨境出口带宽冗余度相对充裕，晚高峰丢包率显著低于电信 163 网络，而其 A 网（AS9929）更是对标电信 CN2 的优质低时延通道。
+            </p>
+            <p>
+              中国移动（AS9808）虽然拥有庞大的国内宽带用户群，但由于其进出其他运营商网络的跨网互联带宽结算费用极其高昂，如果一家机场只在电信机房部署了单线入口，移动用户访问该入口时数据必须先穿过拥挤的跨网互联交换中心，瞬间产生高达一百毫秒以上的二次时延与高额丢包。因此优质的服务商必须在国内同时采购电信、联通、移动三网独立入口并实现 BGP 智能就近解析。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 5: AI Risk Control Whitepaper -->
+      <Section label="AI防封" id="ai-risk" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">AI 开发者出海网络风控防御白皮书 OpenAI 与 Claude 防封策略</h2>
+        <p class="text-muted mt-2 text-sm">
+          面向重度依赖 ChatGPT Plus、Claude 3.5 Sonnet 与海外智能体 API 的开发者，深入揭秘大模型平台的反欺诈判定矩阵。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-4 font-mono text-xs">
+          <div class="space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground text-sm block">1. 大模型平台的四层立体风控防御机制</strong>
+            <p>
+              <strong>第一层 IP ASN 属性与风险评分过滤。</strong>OpenAI 与 Anthropic 对接入的 IP 地址实施严密的商业数据库交叉比对。如果出口 IP 归属于 DigitalOcean、Amazon AWS、Google Cloud 等大型公有云厂商的数据中心机房段，这些 IP 天生带有极高的自动化爬虫与黑产批量注册嫌疑，欺诈值打分通常在 70 分以上，会被 Cloudflare 盾牌直接拦截要求进行无休止的人机验证甚至封禁。
+            </p>
+            <p>
+              <strong>第二层 WebRTC 穿透与真实地理位置泄露。</strong>很多开发者在浏览器中虽然配置了代理扩展，但现代浏览器（Chrome、Edge）内置的 WebRTC 实时通信组件在建立音视频通信通道时，会绕过普通的 HTTP 代理端口直接向外网发送 STUN 探测请求，从而将本地电信或联通分配的真实境内内网 IP 暴露给目标网页，导致账号因位置冲突被即刻封禁。
+            </p>
+            <p>
+              <strong>第三层 本地 DNS 污染回落。</strong>如果客户端未启用 Fake-IP 或 DNS 防污染接管，域名解析请求依然会被发往境内运营商的公共 DNS，返回被污染的虚假 IP，直接触发连接被重置。
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-border space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground text-sm block">2. 开发者 100% 杜绝 AI 封号的工程级避坑实操</strong>
+            <p>
+              首先，在本地客户端（如 Clash Verge Rev）中务必常年开启 TUN 虚拟网卡模式，利用三层网卡驱动把本机所有 Socket 通信彻底封死在加密通道内部，从底层物理消除 WebRTC 泄露真实 IP 的一切可能。
+            </p>
+            <p>
+              其次，在机场节点的策略组调度中，为 OpenAI、Claude、Gemini 以及 HuggingFace 设置独立的专用规则分流组，并将该分流组锁定在具备纯净原生住宅 IP 或高质量原生机房出口的专线上（如光速云的纯净落地组），坚决避免使用成百上千人混用的廉价普通公网中转节点。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 6: Full 42 Brands Ladder & Profiles -->
+      <Section label="梯队画像" id="tiers" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">42 家机场品牌全景三级梯队画像与选型禁忌</h2>
+        <p class="text-muted mt-2 text-sm">
+          根据线路物理质量、抗丢包率、运营年限与客服保障，我们将收录的 42 家品牌系统划分为三大梯队。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-5 font-mono text-xs">
+          <div>
+            <div class="flex items-center gap-2 border-b border-border/60 pb-2">
+              <span class="bg-foreground text-background px-1.5 py-0.5 text-[10px] font-bold">第一梯队</span>
+              <strong class="text-foreground text-sm">综合旗舰专线品牌（主力首选推荐）</strong>
+            </div>
+            <p class="text-muted mt-2 leading-relaxed">
+              <strong>代表品牌 光速云、暮光加速、飞猫云。</strong>这一梯队的共同特征是运营历史长达三年以上、技术团队拥有深厚网络运维底蕴、核心跨境通道全部采用运营商独立以太网私有专线（IEPL）或企业级内网陆缆。晚高峰期间即便遭遇国际公网大面积拥堵割接，其下行速率依然能够稳稳保持在数百兆以上且丢包率为零。全节点提供原生机房出口，支持自研全平台免配置工具与标准开源通用订阅。适合作为所有需要依赖网络进行日常办公、代码开发与学术科研的绝对主力通道。
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-border">
+            <div class="flex items-center gap-2 border-b border-border/60 pb-2">
+              <span class="bg-surface text-foreground border border-border px-1.5 py-0.5 text-[10px] font-bold">第二梯队</span>
+              <strong class="text-foreground text-sm">均衡实用与特色方案品牌（高性价比与长周期备用）</strong>
+            </div>
+            <p class="text-muted mt-2 leading-relaxed">
+              <strong>代表品牌 星岛梦、微风网络、二猫云、唯兔云、Firefly。</strong>第二梯队品牌通常在某个细分领域具备极其亮眼的优势。例如星岛梦拥有极其丰富的不限时按量付费数据包，用多少扣多少，非常适合经常出差但平时用量极少的差旅用户；二猫云在海外全平台流媒体超清解锁上表现优异，深受追剧发烧友喜爱；唯兔云在国内多地优质入口分流上调度出色，对中国移动等复杂宽带网络有着良好的宽带提速表现。其月费通常在十几元区间，是性价比极其出众的实用之选。
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-border">
+            <div class="flex items-center gap-2 border-b border-border/60 pb-2">
+              <span class="bg-surface text-faint border border-border px-1.5 py-0.5 text-[10px] font-bold">第三梯队</span>
+              <strong class="text-foreground text-sm">极低预算备选与轻量级备用通道（学生党与应急逃生）</strong>
+            </div>
+            <p class="text-muted mt-2 leading-relaxed">
+              <strong>代表品牌 闪电鼠、大佬云、无忧链接。</strong>第三梯队品牌的主打优势是令人惊叹的极低价格门槛，单月支出低至 5.6 元到 9 元左右，提供每月 50GB 到 150GB 的基础流量。尽管受制于物理成本，这类品牌在晚高峰时段由于超卖比例较高可能会出现局部的网络抖动，但其作为学生党查阅日常学习资料、或者作为主力专线偶尔发生故障时的第二条备用逃生通道，具备极高的实际冗余价值。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 7: Network Architecture Topology & Physics -->
+      <Section label="线路原理" id="topology" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">为什么晚高峰不卡顿 专线加速物理底层原理解析</h2>
+        <p class="text-muted mt-2 text-sm">
+          理解跨境数据传输的物理路径，看清普通公网直连与企业级 IEPL 陆缆专线的本质差异。
+        </p>
+
+        <div class="mt-6">
+          <TopologyDiagram brandName="光速云 / 企业级顶级专线" lineType="IEPL 国际专线" />
+        </div>
+
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 font-mono text-xs">
+          <div class="border-border border p-5 bg-background space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground block text-sm">1. 普通公网中转与公网直连的拥堵宿命</strong>
+            <p>
+              普通廉价机场或个人自建 VPS，数据包在出境时必须经过三大运营商的国际公网出入口局（如广州、上海、北京出口）。在每晚八点半到十一点的高峰时段，数以亿计的跨国流量挤在极其有限的国际公网带宽管道里，触发路由器的排队丢包惩罚机制。
+            </p>
+            <p>
+              此时 TCP 连接会发生严重的拥塞窗口折半与连续超时重传，在用户端直观表现为终端命令行卡死、视频播放从 4K 骤降至 360P 甚至彻底断流。
+            </p>
+          </div>
+
+          <div class="border-border border p-5 bg-background space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground block text-sm">2. IEPL 专线如何做到晚高峰零丢包</strong>
+            <p>
+              国际以太网私有专线（IEPL）租用的是持牌电信运营商在物理层完全独立的内网陆缆光纤系统。用户在本地连接到服务商设在国内的 BGP 入口机房后，数据包直接进入这条封闭的企业内网跨境隧道直达香港或海外机房。
+            </p>
+            <p>
+              整个传输过程完全不经过任何公共国际互联网出口，物理上与公网拥堵彻底隔离，因而无论公网发生何种程度的拥堵割接，专线内部的数据流始终保持平直如尺，丢包率始终为零。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 8: Regional Node Distribution & Scientific Assignment -->
+      <Section label="节点分工" id="regions" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">全球四大核心加速区域技术特性与科学分工策略</h2>
+        <p class="text-muted mt-2 text-sm">
+          节点不是越多越好，理解不同国家出口的物理时延与政策属性，科学分流才能实现效率最大化。
+        </p>
+
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 font-mono text-xs">
+          <div class="border-border border p-5 bg-background space-y-2 text-muted leading-relaxed">
+            <div class="flex items-center justify-between border-b border-border/60 pb-2">
+              <strong class="text-foreground text-sm">香港专线节点（物理时延最低的主力首选）</strong>
+              <span class="text-accent text-[10px]">往返时延 25ms - 40ms</span>
+            </div>
+            <p>
+              香港地理位置毗邻广东，是物理距离中国大陆最近的海外国际网络交换中心。通过陆缆专线连接香港机房，往返时延通常仅需 30 毫秒左右，在网页浏览、Git 仓库同步以及终端键盘敲击时几乎感觉不到任何延迟。
+            </p>
+            <p>
+              需要注意的是，部分特定海外流媒体服务对香港地区版权库进行了局部限制，日常建议作为所有代码开发与通用网络请求的默认主力出口。
+            </p>
+          </div>
+
+          <div class="border-border border p-5 bg-background space-y-2 text-muted leading-relaxed">
+            <div class="flex items-center justify-between border-b border-border/60 pb-2">
+              <strong class="text-foreground text-sm">日本专线节点（亚太海缆枢纽与二次元精选）</strong>
+              <span class="text-accent text-[10px]">往返时延 50ms - 70ms</span>
+            </div>
+            <p>
+              日本东京拥有全亚太最发达的海底光缆汇聚网络，NTT 与 KDDI 等顶级 Tier 1 运营商网络互联极其充沛。特别是对于中国华北、东北的联通与电信宽带用户，直连日本的物理走线往往比南下广东绕行香港更加平顺。
+            </p>
+            <p>
+              日本节点对各类开源社区镜像、二次元游戏以及学术科研站点的兼容性极好，是仅次于香港的第二高频主力节点。
+            </p>
+          </div>
+
+          <div class="border-border border p-5 bg-background space-y-2 text-muted leading-relaxed">
+            <div class="flex items-center justify-between border-b border-border/60 pb-2">
+              <strong class="text-foreground text-sm">新加坡专线节点（东南亚出海核心与商业中立）</strong>
+              <span class="text-accent text-[10px]">往返时延 55ms - 80ms</span>
+            </div>
+            <p>
+              新加坡是连接东南亚与印度洋的核心枢纽，对华南移动宽带有着极为友好的路由直达优势。其政治与商业环境高度中立，在应对海外跨国电商运营、TikTok 出海营销以及各类海外金融账户管理时表现极为稳定。
+            </p>
+            <p>
+              同时新加坡对 OpenAI 等大模型平台官方服务具备第一梯队的准入支持，是 AI 专线的重要备份。
+            </p>
+          </div>
+
+          <div class="border-border border p-5 bg-background space-y-2 text-muted leading-relaxed">
+            <div class="flex items-center justify-between border-b border-border/60 pb-2">
+              <strong class="text-foreground text-sm">美国专线节点（大模型研发总部与原生功能首选）</strong>
+              <span class="text-accent text-[10px]">往返时延 130ms - 180ms</span>
+            </div>
+            <p>
+              由于太平洋海底光缆的物理光速极限，连接美国西海岸节点无论如何优化也会存在 130 毫秒以上的固有物理延迟，因而不适合用于对抖动敏感的实时联机游戏。
+            </p>
+            <p>
+              但是，美国拥有全球最庞大、纯净的原生家宽与独立机房 IP 资源。许多硅谷 AI 实验室在发布试验性内测功能或推出最新模型架构时，往往优先对美区原生 IP 放行。在遇到特定美区专属权限认证时，美国节点是无可替代的关键底牌。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 9: Risk Control & Anti-Scam Rules -->
+      <Section label="避坑法则" id="security" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">跨境网络选型避坑与资金防跑路四条铁律</h2>
+        <p class="text-muted mt-2 text-sm">
+          面对鱼龙混杂的跨境网络市场，牢记以下四条经过无数开发者血泪教训换来的避坑铁律。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background divide-y divide-border font-mono text-xs">
+          <div class="pb-4">
+            <strong class="text-foreground text-sm block">铁律一 坚决执行先小额月付试水原则</strong>
+            <p class="text-muted mt-1.5 leading-relaxed">
+              无论任何服务商宣传页面描述得多么天花乱坠、年付折扣折算多么诱人，初次使用必须优先购买一个月的入门轻量套餐。在您自己日常工作的宽带环境和晚高峰时段充分体验一至两周，验证满意后再考虑按季度或按半年续费。
+            </p>
+          </div>
+
+          <div class="py-4">
+            <strong class="text-foreground text-sm block">铁律二 时刻保持双技术栈与双机场互备方案</strong>
+            <p class="text-muted mt-1.5 leading-relaxed">
+              千万不要把所有开发和办公希望完全寄托在单一服务商身上。日常建议配置一条以光速云为代表的高质量专线作为主力高速通道，同时备有一条小额月付或不限时按量通道作为容灾备用。当国际海缆偶发物理割接时，能在两秒内无缝切换保障工作流。
+            </p>
+          </div>
+
+          <div class="py-4">
+            <strong class="text-foreground text-sm block">铁律三 优先选择支持通用订阅协议的开源生态</strong>
+            <p class="text-muted mt-1.5 leading-relaxed">
+              坚决避免被某些强制绑定闭源自研客户端的平台绑架。始终认准支持标准 Clash Verge Rev、v2rayN、Shadowrocket 通用订阅格式的服务商，这样即便某个客户端出现更新故障，也能随时无缝迁移至其他开源前端。
+            </p>
+          </div>
+
+          <div class="py-4">
+            <strong class="text-foreground text-sm block">铁律四 学会识别虚假专线与 NAT 端口转发伪装</strong>
+            <p class="text-muted mt-1.5 leading-relaxed">
+              市场上部分不良小作坊用廉价的国内 NAT 机器做简单的端口转发，却在节点命名上大肆标注 IEPL 专线字样。识别伪专线的方法极其简单，在晚高峰期间利用 MTR 工具持续 Ping 节点三分钟，若丢包率大于百分之二且延迟上下剧烈跳动超过五十毫秒，则必定为虚假专线。
+            </p>
+          </div>
+
+          <div class="pt-4">
+            <strong class="text-foreground text-sm block">铁律五 警惕虚标大流量与高倍率刺客陷阱</strong>
+            <p class="text-muted mt-1.5 leading-relaxed">
+              部分廉价服务商在宣传时声称每月提供 1000GB 甚至无上限的海量流量，但在订阅下发的节点列表中，悄悄给延迟稍好的优质专线标注了三倍、五倍甚至十倍的扣费倍率。用户下载拉取一个 10GB 的开发镜像，账户后台实际被扣减了 100GB 额度，不出几天流量便被快速榨干，被迫二次加购流量包。在导入订阅后，务必仔细核对节点名称后的倍率标注，日常优先选用标注为 1.0x 或 0.5x 的标准倍率节点。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 6: Actionable 4-Step Decision Workflow -->
+      <Section label="决策流程" id="workflow" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">开发者工程级选型验证四步闭环操作流程</h2>
+        <p class="text-muted mt-2 text-sm">
+          按照以下四步清晰流程，即可在十分钟内为自己搭建起一套坚如磐石的全球网络加速环境。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-5 font-mono text-xs">
+          <div class="flex gap-4 items-start">
+            <span class="w-7 h-7 rounded-full bg-accent/10 border border-accent text-accent font-bold flex items-center justify-center shrink-0">1</span>
+            <div>
+              <strong class="text-foreground text-sm block">明确自身月度流量消耗与应用核心痛点</strong>
+              <p class="text-muted mt-1 leading-relaxed">
+                评估自己的月均流量需求。普通网页查资料和代码补全每月 100GB 绰绰有余；如果需要频繁拉取大型 Docker 镜像或观看 4K 影音，建议选择 200GB 以上档位。
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 items-start">
+            <span class="w-7 h-7 rounded-full bg-accent/10 border border-accent text-accent font-bold flex items-center justify-center shrink-0">2</span>
+            <div>
+              <strong class="text-foreground text-sm block">购买首月小额月付套餐并导入客户端</strong>
+              <p class="text-muted mt-1 leading-relaxed">
+                前往推荐榜首光速云官网选购轻量月付套餐（使用专属优惠码 AMM），复制通用订阅链接后导入到本地 Clash Verge Rev 或 Shadowrocket 客户端中完成节点拉取。
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 items-start">
+            <span class="w-7 h-7 rounded-full bg-accent/10 border border-accent text-accent font-bold flex items-center justify-center shrink-0">3</span>
+            <div>
+              <strong class="text-foreground text-sm block">在晚高峰时段验证晚高峰延迟平直度与 AI 解锁</strong>
+              <p class="text-muted mt-1 leading-relaxed">
+                在晚上九点到十点期间，打开终端执行 Git Clone 拉取大型仓库，访问 ChatGPT 发送多条连续指令，观察是否有断流重试现象，确保线路质量符合预期。
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 items-start">
+            <span class="w-7 h-7 rounded-full bg-accent/10 border border-accent text-accent font-bold flex items-center justify-center shrink-0">4</span>
+            <div>
+              <strong class="text-foreground text-sm block">开启客户端 TUN 虚拟网卡模式并配置一条不限时备用包</strong>
+              <p class="text-muted mt-1 leading-relaxed">
+                在客户端设置中开启 TUN 虚拟网卡模式，接管系统全部网络请求彻底避免 DNS 泄露；同时常备一条光速云 147 元不过期买断包，形成终身无忧的双互备加速防线。
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 7: Hands-on Network Diagnostics -->
+      <Section label="测速排障" id="diagnostics" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">开发者工程级网络可用性实战测试手册 从 MTR 链路追踪到 MTU 优化</h2>
+        <p class="text-muted mt-2 text-sm">
+          拒绝被华而不实的下行测速截图忽悠，掌握三套命令行工具，在终端中亲手验证加速线路的物理真实指标。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-6 font-mono text-xs">
+          <div class="space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground text-sm block">1. 运用 MTR 工具诊断端到端丢包拐点</strong>
+            <p>
+              在 Linux 或 macOS 终端中执行 mtr -rw -c 100 目标机房IP（Windows 用户可使用 WinMTR 或 BestTrace 工具）。MTR 会向目标路径连续发送 100 个探测数据包，并完整列出沿途每一跳路由节点的丢包率与往返时延。
+            </p>
+            <p>
+              观察的核心在于丢包是在哪一跳骤然飙升的。如果在第一跳到第四跳（本地家庭路由器与省内汇聚层）出现丢包，说明是本地 Wi-Fi 信号衰减或小区宽带光猫拥塞；如果在境内骨干网跳入专线跨境隧道处产生大量丢包，则说明服务商向运营商采购的物理专线带宽容量严重不足超卖；若整条链路在晚高峰 100 个包中 100% 成功返回且时延抖动小于 5 毫秒，则是无可挑剔的顶级专线。
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-border space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground text-sm block">2. 利用 curl 精确剖析 TCP 与 TLS 握手延时结构</strong>
+            <p>
+              在日常敲击键盘时，终端代码补全的跟手流畅度取决于首字节响应时间（TTFB）。通过在终端执行 curl -w 耗时统计命令，可以把一次网络请求拆解为 DNS 解析用时、TCP 握手用时、TLS 加密协商用时、以及服务器响应返回首字节的真实耗时。
+            </p>
+            <p>
+              对于优质的香港或日本 IEPL 专线，DNS 查询在 Fake-IP 机制下耗时为零毫秒，TCP 握手耗时在 30 毫秒左右，TLS 协商在 60 毫秒左右完成，总用时控制在 100 毫秒以内，用户在编写代码时完全感受不到任何网络等待。
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-border space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground text-sm block">3. 本地网络最大传输单元（MTU）调优规避拆包丢包</strong>
+            <p>
+              网络协议在传输数据时，底层以太网标准帧默认最大支持 1500 字节（MTU 1500）。然而当数据包经过本地代理客户端二次加密封装时，会额外增加外层 IP 包头、TCP 头部以及 TLS 握手签名开销。
+            </p>
+            <p>
+              如果原始数据包加上加密外壳后总长度超过了 1500 字节，操作系统便被迫在底层将其拆分为两个独立数据包进行分片传输（IP Fragmentation），极易被沿途路由器丢弃并引发严重的重传卡顿。通过在客户端高级设置中将 TUN 网卡的 MTU 主动微调为 1420 甚至 1400，能够彻底消除网络拆包带来的额外开销。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 8: Environment Integration & Tuning -->
+      <Section label="环境适配" id="tuning" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">多开发环境深度协同与端口免冲突实操方案</h2>
+        <p class="text-muted mt-2 text-sm">
+          解决 WSL2、Docker 容器、Git 命令行与日常桌面软件的代理冲突，打造无缝全球加速工作流。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-5 font-mono text-xs">
+          <div class="space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground text-sm block">1. WSL2 子系统网络代理穿透的最佳实践</strong>
+            <p>
+              在 Windows 系统上使用 WSL2 编写代码的开发者普遍遇到过子系统内部无法联网的困扰。由于 WSL2 采用 Hyper-V 内部独立的虚拟私有子网，其默认网关指向虚拟适配器，无法直接使用 127.0.0.1 访问宿主机上运行的系统代理。
+            </p>
+            <p>
+              彻底解决该问题的最优雅方案是在宿主机的 Clash Verge Rev 中直接开启 TUN 虚拟网卡模式。TUN 模式会在 Windows 内核三层接管所有网络包，无论是 Windows 宿主机自身、WSL2 子系统内部发起的请求、还是移动热点设备，流量都会自动按分流规则直通代理隧道，完全免去了在 WSL2 内部每次启动时动态解析宿主机 IP 并 export 环境变量的繁琐配置。
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-border space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground text-sm block">2. Docker 镜像拉取与 Git 命令行快速配置</strong>
+            <p>
+              Docker 守护进程是一个独立的后台系统服务，它在拉取境外镜像时并不会读取当前用户的用户级代理环境变量。需要在系统服务目录下为 Docker 创建独立的代理配置文件，写入包含宿主机 IP 和 7890 端口的环境变量并重载服务。
+            </p>
+            <p>
+              对于 Git 仓库拉取，针对 HTTPS 仓库可以通过执行 git config --global http.proxy http://127.0.0.1:7890 注入全局代理；针对 SSH 协议仓库，则可在用户的 .ssh 配置文件中为 github.com 单独添加 ProxyCommand 参数，轻松跑满千兆带宽。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 9: Technical Guides & Topic Cluster -->
+      <Section label="技术专栏" id="guides" class="mt-24">
+        <div class="flex items-baseline justify-between gap-4 border-b border-border/60 pb-3">
+          <div>
+            <h2 class="text-2xl font-medium tracking-tight">开发者进阶专著级技术专栏集群</h2>
+            <p class="text-muted mt-1 text-sm font-mono">
+              包含全平台客户端调优、协议物理拓扑、AI 风控应对与终端加速的万字级深度指南。
+            </p>
+          </div>
+          <a href="/blog" class="text-xs font-mono text-accent underline whitespace-nowrap">
+            查看全部专栏文章 &rarr;
+          </a>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {latestPosts.map((post) => (
+            <div class="border-border border p-4 bg-background hover:border-foreground/30 flex flex-col justify-between transition-colors">
+              <div>
+                <p class="font-mono text-[11px] text-faint">
+                  {post.data.pubDate.toLocaleDateString('zh-CN')} · {post.data.tags.slice(0, 2).join(' / ')}
+                </p>
+                <h3 class="text-base font-medium tracking-tight mt-1.5 text-foreground hover:text-accent">
+                  <a href={`/blog/${post.id}`} class="no-underline">
+                    {post.data.title}
+                  </a>
+                </h3>
+                <p class="text-muted text-xs mt-2 line-clamp-2 leading-relaxed">
+                  {post.data.description}
+                </p>
+              </div>
+              <div class="mt-4 pt-2.5 border-border border-t">
+                <a href={`/blog/${post.id}`} class="text-xs font-mono text-accent underline">
+                  阅读万字专著全文 &rarr;
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <!-- Section 8: Selection FAQs with Structured Data -->
+      <Section label="常见问题" id="questions" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">读者与用户常见核心疑问解答（FAQ）</h2>
+        <p class="text-muted mt-2 text-sm">
+          汇总全网开发者在选型、付费避坑、专线鉴别与客户端配合中最关心的关键问题。
+        </p>
+
+        <div class="border-border mt-6 border-t bg-background divide-y divide-border font-mono text-xs">
+          {faqs.map((faq, idx) => (
+            <div class="p-5 hover:bg-surface/20 transition-colors">
+              <div class="flex items-start gap-2">
+                <span class="text-accent font-bold text-sm">Q{idx + 1}.</span>
+                <h3 class="text-foreground font-medium text-sm leading-snug">{faq.q}</h3>
+              </div>
+              <p class="text-muted mt-3 text-xs leading-relaxed pl-6">{faq.a}</p>
+            </div>
           ))}
         </div>
       </Section>
     </div>
 
-    <div class="shell-body border-border mt-24 border-t pt-10">
-      <h2 class="text-xl font-medium tracking-[-0.028em]">
-        Try it on the folder you actually work in.
-      </h2>
-      <p class="text-muted mt-3">
-        The free version indexes 20,000 files and needs no account. If your archive is larger than
-        that, you will know within the first minute.
+    <!-- Bottom CTA Bar -->
+    <div class="shell-body border-border mt-24 border-t pt-10 pb-20">
+      <h2 class="text-xl font-medium tracking-tight">开启属于您的高效全球网络加速环境</h2>
+      <p class="text-muted mt-2 text-sm font-mono">
+        全网 42 家机场评测数据大表、各档位定价决策矩阵与全平台代理客户端下载指南均已全量开放，随时查阅。
       </p>
-      <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
-        <a class="btn" href="/#how">
-          Download 1.4
+      <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 font-mono text-xs">
+        <a class="btn py-2 px-5" href="/brands">
+          查阅 42 家品牌全量大表
         </a>
-        <a class="text-sm underline underline-offset-[0.15em]" href="/blog">
-          Read how it is built
+        <a class="text-sm underline underline-offset-[0.15em] hover:text-accent" href="/pricing">
+          查看场景定价决策矩阵 &rarr;
+        </a>
+        <a class="text-sm underline underline-offset-[0.15em] hover:text-accent" href="/clients">
+          阅读客户端配置与排障手册 &rarr;
         </a>
       </div>
     </div>

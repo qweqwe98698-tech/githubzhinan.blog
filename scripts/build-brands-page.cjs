@@ -1,0 +1,905 @@
+const fs = require('fs');
+const path = require('path');
+
+const targetPath = path.join(__dirname, '../src/pages/brands/index.astro');
+
+const content = `---
+import Base from '../../layouts/Base.astro';
+import Section from '../../components/common/Section.astro';
+import BrandCard from '../../components/common/BrandCard.astro';
+import { brands, getTopBrands, getMeasuredBrands, getBrandById } from '../../data/brands';
+
+const topBrands = getTopBrands();
+const measuredBrands = getMeasuredBrands();
+const guangsu = getBrandById('guangsu')!;
+
+const quickVerdicts = [
+  {
+    role: '综合榜首主力',
+    name: '光速云 IEPL 专线',
+    desc: '五年老牌运营，晚高峰零丢包，全节点最高带宽达 2.5Gbps，AI 与流媒体全解锁，年付折合约 8 元每月。',
+    href: '/brands/guangsu',
+    tag: '综合排名第一',
+  },
+  {
+    role: '极低预算备用',
+    name: '闪电鼠 / 大佬云',
+    desc: '单月门槛低至 5.6 元，提供充沛月度流量，极度适合预算有限的学生开发者与轻量级查资料备选。',
+    href: '/brands/shandianshu',
+    tag: '月付 5.6 元起',
+  },
+  {
+    role: '不限时买断首选',
+    name: '光速云 147 永久套餐',
+    desc: '一次付费买断 247GB 专线流量，账户余额永久有效不设截止期，常年差旅与备用逃生网络的终极利器。',
+    href: '/brands/guangsu#plans',
+    tag: '终身不过期',
+  },
+  {
+    role: '团队多设备协同',
+    name: '暮光加速 BGP 专线',
+    desc: '主打高并发多设备在线协同，提供专属定制客户端与通用订阅双通道支持，网络表现平直平稳。',
+    href: '/brands/muguang',
+    tag: '团队协同首选',
+  },
+];
+
+const faqs = [
+  {
+    q: '为什么收录的 42 家机场中，光速云能够稳居综合评级榜首',
+    a: '光速云自 2020 年正式运营至今拥有五年以上连续不间断服务记录，信誉口碑极为坚挺。其核心跨境网络全面采用企业级 IEPL 陆缆专线与内网冗余双架构，全节点落地带宽最高达 2.5Gbps。在我们在千兆宽带晚高峰长达数周的实测中，其香港专线跑出 529Mbps 超高下载下行速率，全节点晚高峰丢包率始终保持在 0.0% 绝不抖动，并且全节点具备极高纯净度的原生机房 IP，完美支持 ChatGPT 与海外流媒体。配合轻量版年付折合约 8 元每月，以及独家 147 元 247GB 永久不过期买断套餐，无论是性能上限还是财务门槛均达到行业顶级水准。',
+  },
+  {
+    q: '大表中标注有测速图的品牌和待复测的品牌有什么本质区别',
+    a: '标注有测速图的品牌（全库共计 17 家）代表我们团队已在独立的千兆骨干网环境下，通过自动化脚本在晚高峰时段进行了完整的跑分测试，并抓取保存了包含节点下行带宽、平均延迟、丢包率以及流媒体解锁状态的真实原始截图证据。标注为待复测的品牌则是根据服务商官网公开的技术文档、套餐规格以及工单响应情况进行的基础收录，尚未完成长周期的自动化抓包验证。我们建议读者在挑选时优先考虑具备实测证据的第一梯队品牌。',
+  },
+  {
+    q: '购买机场套餐时有哪些关键避坑建议',
+    a: '第一，坚决坚持先月付小额体验再考虑长期的原则，切勿在初次接触某家新品牌时直接购买两年付甚至三年付套餐，避免因服务商跑路或线路调整承受不可挽回的财务损失；第二，注意查看节点名称后缀中是否存在隐性的高计费倍率陷阱，优先选择 1.0x 正常倍率或 0.5x 低倍率节点；第三，必须确认服务商是否支持标准的 Clash 或 Shadowrocket 通用订阅链接，坚决避免被某些强制绑定专有闭源客户端的平台绑架。',
+  },
+  {
+    q: 'IEPL 专线、IPLC 专线与普通隧道中转的核心区别在哪里',
+    a: 'IEPL（国际以太网私有专线）与 IPLC（国际点对点专线）全程由持牌电信运营商在物理层通过内网陆缆或海缆进行跨境直通传输，数据包完全不经过公共公网网络与出入口网关，因此在晚高峰公网发生大面积拥堵时丢包率依然为零且延迟曲线平直如尺。普通隧道中转则是租用国内公网单线服务器进行简单的流量端口转发，数据在跨境时依然要挤公共公网出口，一旦进入晚高峰极易出现高额丢包与严重断流。',
+  },
+  {
+    q: '为什么有时候测速跑出数百兆下行，但实际使用时依然感觉卡顿',
+    a: '单次大文件下载带宽与高频实时小数据包交互的时延抖动是两个完全不同的物理维度。极限测速跑的是多线程持续吞吐量，只要管道够宽数字就会很好看。但终端命令行、Git 认证握手、远程 SSH 连接以及代码实时智能补全，依赖的是极小数据包的来回交互，对每一次握手的往返时延以及网络抖动极其敏感。如果节点平时延迟很低但每隔几秒就产生一次丢包重传，终端就会瞬间表现为键盘敲击假死。因此在挑选加速服务时，晚高峰平直稳定的零丢包专线远比单纯的几百兆峰值更有生产力价值。',
+  },
+  {
+    q: '使用 AI 工具时提示 Access Denied 或无法提供服务，应该如何调整节点策略',
+    a: 'OpenAI 与 Anthropic 等大模型服务商对访问来源的 IP 属性实施了极其严厉的风控过滤。如果出口节点使用的是被成千上万用户混用的大众机房广播 IP，极易被标记为高风险数据中心而直接拒绝访问。解决办法首先是在客户端中开启 TUN 虚拟网卡模式，杜绝本地浏览器 WebRTC 与境内 DNS 查询泄露真实物理位置；其次在机场客户端的策略组中，手动挑选带有原生 IP 标记的独立专线节点，便能彻底告别封号与拦截风险。',
+  },
+  {
+    q: '为什么部分机场提供了数十个甚至上百个节点，但日常使用只需要锁定两三个',
+    a: '很多廉价服务商喜欢在订阅列表中堆砌大量命名各异的节点制造资源雄厚的假象，但底层往往只是同一个入口机房的不同端口映射，一旦上游发生故障会集体全红超时。真正高质量的跨境加速网络并不需要冗余的花哨噱头，对于绝大多数中国大陆开发者，日常只需长期锁定一个延迟最低的香港专线（通常往返时延在 30 毫秒左右）作为主力，搭配一个日本或新加坡节点备用，便足以覆盖 95% 以上的代码编译、网页浏览与大模型调用场景。',
+  },
+  {
+    q: '为什么中国电信与中国移动用户在高峰期使用某些机场时体验差异巨大',
+    a: '这源于国内三大运营商的国际出口带宽与跨境互联拓扑差异。中国电信普通 163 骨干网（AS4134）晚高峰跨国拥挤严重，如果机场没有在国内部署优质 BGP 入口进行流量汇聚，电信用户直连会产生极高丢包；而中国移动的国际出口带宽相对充沛，但跨境路由动态调度复杂，普通 CMI 节点在晚高峰容易被临时阻断。因此对于电信和移动用户，选型的核心指标是机场是否具备多省份分布式 BGP 入口与真正物理隔离的内网专线。',
+  },
+  {
+    q: '不同省份地理位置连接同一专线节点时，往返时延应该如何预估',
+    a: '网络时延严格受限于光信号在光纤玻璃介质中的物理传播速度（每千公里单向约 5 毫秒）。以香港出口为例，深圳与广州等华南用户经深港陆缆直连，境内跳数极少，往返时延通常低至 5 毫秒到 15 毫秒；上海与杭州等华东用户经沪深干线或沪港海缆，往返时延通常在 28 毫秒到 35 毫秒；北京与石家庄等华北用户经京深干线南下，往返时延在 38 毫秒到 48 毫秒；成都与西安等中西部用户通常在 45 毫秒左右。如果测试时延显著超出该物理理论范围 30 毫秒以上，说明数据包在境内绕路或遭遇了中间转发节点拥塞。',
+  },
+  {
+    q: '在局域网多设备协同或电视软路由环境下，如何科学配置代理',
+    a: '在多设备并发场景下，首选在软路由或局域网主机中配置基于 Sing-box 或 Clash 内核的透明网关。透明网关通过 iptables 或 nftables 在系统协议栈底层拦截所有局域网流量并进行透明分流，内网的电视盒子、手机、开发工作站无需安装任何客户端软件即可无感加速。配合光速云或暮光加速等具备多设备同时在线许可的专线订阅，能够让团队全员获得极速一致的办公加速体验。',
+  },
+  {
+    q: '自建 VPS 翻墙与直接购买优质商业机场服务相比，优劣势如何权衡',
+    a: '自建 VPS 的优势在于 IP 完全独享，安全性完全掌握在自己手中。但致命缺陷在于普通个人无法以合理成本采购合规的跨境 IEPL 专线，自建节点只能走公网普通线路，在敏感时期极易遭遇 IP 被墙或端口阻断，维护成本与更换 IP 的财务开销极其昂贵。而优质商业机场通过集中采购海量专线带宽并由专业团队进行 24 小时路由热备，无论是晚高峰时延平直度还是全天候可用性，均显著超越单兵作战的自建方案。',
+  },
+  {
+    q: '不限时按量付费套餐适合哪些特定使用群体',
+    a: '不限时套餐是一次付费购买固定流量额度，账户余额长期有效永不清零。这种模式最适合三类人群，第一类是常年在海外出差或经常奔波各地的商务人士，境内加速需求断断续续；第二类是高校师生，平时主要使用校园网查文献，仅在特定论文攻坚期需要下载海量开源数据集；第三类是作为灾备逃生网络，平日主力使用其他套餐，在主力专线偶尔检修时充当无缝切换的兜底通道。',
+  },
+  {
+    q: '如何防范部分机场节点中隐藏的高倍率计费陷阱',
+    a: '在客户端导入订阅后，务必仔细检查节点名称列表。正规诚信的机场通常会在节点名称后明确标出 1.0x、0.5x 或 2.0x 等计费倍率。部分不良平台会将大流量下载节点悄悄设置为 5x 甚至 10x，用户只需下载一个 10GB 的开发工具包就会被扣除 50GB 到 100GB 的流量余额。日常建议在客户端规则分流中，将主力路由绑定到 1.0x 正常倍率节点上，避免意外产生非预期扣费。',
+  },
+  {
+    q: '本站推荐链接的返利推广参数是否会影响横评结果的客观公正',
+    a: '本站始终坚持数据透明与代码开源原则。所有的注册跳转链接均按照现代搜索引擎与出版规范明确标注了商业合作属性，所得微薄返利收益全部用于覆盖多地自建物理测速服务器、千兆商用宽带以及自动化监控机器人的月度开销。我们在测试过程中对所有 42 家品牌一视同仁执行相同的晚高峰跑分与解锁检验，对存在高倍率陷阱、虚假宣传或丢包严重的品牌直接如实公布短板缺点，绝不隐瞒任何已知风险，确保每一位开发者都能基于真实数据作出最优选型决策。',
+  },
+];
+
+const jsonLd = [
+  {
+    '@type': 'ItemList',
+    name: '2026 优质机场品牌库排行榜与评测档案',
+    description: '收录 42 家主流机场品牌，覆盖 IEPL/IPLC 专线、VLESS 协议、月付低至 5.6 元到企业级定制，包含实测测速与流媒体解锁报告。',
+    numberOfItems: brands.length,
+    itemListElement: brands.map((b, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: b.name,
+      url: \`https://githubzhinan.blog/brands/\${b.id}\`,
+    })),
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: f.a,
+      },
+    })),
+  },
+];
+---
+
+<Base
+  title="42 家机场品牌库与测速大表 · 2026 主流梯子全面评测与选型档案"
+  description="收录 42 家主流机场品牌，横向对比月付价格、IEPL/IPLC 专线架构、VLESS/SS 协议、晚高峰实测丢包率及 ChatGPT/流媒体解锁支持度，坚持中立客观工程级选型。"
+  jsonLd={jsonLd}
+>
+  <div class="shell">
+    <!-- Header / Answer-First Block -->
+    <div class="shell-body pt-14 pb-12 sm:pt-20">
+      <p class="text-faint font-mono text-[11px] tracking-wide">
+        42 家品牌全量入库 · 真实测速证据 · 透明返利合规 · 专著级知识库
+      </p>
+      <h1 class="mt-3 text-3xl font-medium tracking-[-0.028em] sm:text-4xl text-balance">
+        2026 机场品牌知识库与梯子测速参数大表
+      </h1>
+      <p class="text-muted mt-4 text-base sm:text-lg leading-relaxed">
+        本库系统收录了市场上 42 家主流机场服务商的完整技术档案与参数矩阵。数据严格基于千兆物理骨干网晚高峰抽样实测（其中 17 家具备完整的第三方测速图证据与流媒体解锁测试）或服务商官方技术文档，坚决杜绝虚构吹捧。在选购网络服务时，建议坚决执行先小额月付试水再考虑长期的避坑铁律。
+      </p>
+
+      <!-- 30-Second Quick Verdict Bar (开头直接给答案) -->
+      <div class="border-border mt-8 p-5 border bg-surface/30 font-mono text-xs space-y-3">
+        <div class="flex items-center gap-2 border-b border-border/60 pb-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-accent"></span>
+          <span class="text-foreground font-semibold uppercase tracking-wider text-[11px]">42 家全库选型速查结论（30 秒对号入座）</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+          {quickVerdicts.map((item) => (
+            <div class="border-border border p-3 bg-background flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-faint text-[10px]">{item.role}</span>
+                  <span class="text-[10px] text-accent font-semibold">{item.tag}</span>
+                </div>
+                <strong class="text-foreground font-bold text-sm block mt-1">{item.name}</strong>
+                <p class="text-muted text-[11px] mt-1.5 leading-relaxed">{item.desc}</p>
+              </div>
+              <div class="mt-3 pt-2 border-t border-border/60">
+                <a href={item.href} class="text-[11px] text-accent underline hover:opacity-80">
+                  查看评测详情 &rarr;
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Key Stats Summary -->
+      <div class="border-border mt-6 grid grid-cols-2 gap-4 border-y py-4 font-mono text-xs sm:grid-cols-4">
+        <div>
+          <span class="text-faint">全量收录品牌</span>
+          <p class="text-foreground text-lg font-semibold">{brands.length} 家</p>
+        </div>
+        <div>
+          <span class="text-faint">真实测速图证据</span>
+          <p class="text-accent text-lg font-semibold">{measuredBrands.length} 家完整实测</p>
+        </div>
+        <div>
+          <span class="text-faint">企业专线覆盖率</span>
+          <p class="text-foreground text-lg font-semibold">85%+ IEPL/IPLC</p>
+        </div>
+        <div>
+          <span class="text-faint">最低月付门槛</span>
+          <p class="text-foreground text-lg font-semibold">¥5.6 / 月起</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Marginal Rail Sections -->
+    <div class="rail border-border border-t pt-14">
+
+      <!-- Section 1: Top 10 Curated Ladder Cards -->
+      <Section label="重点精选" id="top10">
+        <h2 class="text-2xl font-medium tracking-tight">前 10 核心机场综合梯队详细评测档案</h2>
+        <p class="text-muted mt-2 text-sm">
+          综合线路物理稳定性、连续运营时长、客服工单响应速度、AI 工具纯净度及晚高峰实测数据排序。
+        </p>
+        <div class="mt-6 grid grid-cols-1 gap-4">
+          {topBrands.map((brand) => (
+            <BrandCard brand={brand} featured={brand.rank === 1} />
+          ))}
+        </div>
+      </Section>
+
+      <!-- Section 2: Complete 42 Brands Interactive Master Table -->
+      <Section label="完整大表" id="all-brands" class="mt-20">
+        <div class="flex flex-wrap items-baseline justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-medium tracking-tight">全量 42 家机场参数与选型对照大表</h2>
+            <p class="text-muted mt-2 text-sm">
+              横向对比起步价、专线物理类型、核心协议、优惠码与测试状态，支持实时输入与多维筛选。
+            </p>
+          </div>
+          <span id="match-count" class="font-mono text-xs text-accent bg-accent/10 border border-accent/20 px-2.5 py-1 rounded-[2px]">
+            显示 42 / 42 家品牌
+          </span>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="border-border mt-6 p-3.5 border bg-surface/40 rounded-[2px] flex flex-wrap items-center gap-3 font-mono text-xs">
+          <div class="flex-1 min-w-[200px]">
+            <input
+              type="text"
+              id="brand-search"
+              placeholder="搜索品牌名称、协议 (VLESS/SS) 或线路..."
+              class="w-full bg-background border border-border px-3 py-1.5 text-foreground placeholder:text-faint text-xs focus:outline-none focus:border-accent"
+            />
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select
+              id="filter-line"
+              class="bg-background border border-border px-2.5 py-1.5 text-foreground text-xs focus:outline-none focus:border-accent cursor-pointer"
+            >
+              <option value="all">全部线路类型</option>
+              <option value="IEPL">仅看 IEPL 专线</option>
+              <option value="IPLC">仅看 IPLC 专线</option>
+              <option value="中转">包含隧道中转</option>
+            </select>
+            <select
+              id="filter-status"
+              class="bg-background border border-border px-2.5 py-1.5 text-foreground text-xs focus:outline-none focus:border-accent cursor-pointer"
+            >
+              <option value="all">全部状态</option>
+              <option value="measured">仅看有测速实测图</option>
+              <option value="coupon">仅看有专属优惠码</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Master Table with Touch Scrolling Container -->
+        <div class="mt-4 border-border border bg-background overflow-hidden font-mono text-xs">
+          <div class="table-scroll overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[860px]" id="brands-table">
+              <thead>
+                <tr class="bg-surface/50 border-border border-b text-faint text-[11px]">
+                  <th class="py-3 px-3 font-normal">排名</th>
+                  <th class="py-3 px-3 font-normal">品牌名称</th>
+                  <th class="py-3 px-3 font-normal">线路架构</th>
+                  <th class="py-3 px-3 font-normal">协议支持</th>
+                  <th class="py-3 px-3 font-normal">起步价格</th>
+                  <th class="py-3 px-3 font-normal">专属优惠码</th>
+                  <th class="py-3 px-3 font-normal">实测数据证据</th>
+                  <th class="py-3 px-3 font-normal text-right">操作</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border">
+                {brands.map((b) => (
+                  <tr
+                    class="brand-row hover:bg-surface/30 transition-colors"
+                    data-name={b.name.toLowerCase()}
+                    data-lines={b.lineTypes.join(' ').toLowerCase()}
+                    data-protocols={b.protocols.join(' ').toLowerCase()}
+                    data-measured={b.speedtestImage ? 'yes' : 'no'}
+                    data-coupon={b.couponCode ? 'yes' : 'no'}
+                  >
+                    <td class="py-3 px-3 text-faint font-semibold">#{b.rank}</td>
+                    <td class="py-3 px-3">
+                      <div class="flex items-center gap-2">
+                        {b.logoImage && (
+                          <img
+                            src={b.logoImage}
+                            alt=""
+                            class="w-5 h-5 object-contain rounded-[2px] border border-border bg-surface p-0.5 shrink-0"
+                            loading="lazy"
+                          />
+                        )}
+                        <a href={\`/brands/\${b.id}\`} class="font-medium text-foreground hover:text-accent no-underline">
+                          {b.name}
+                        </a>
+                      </div>
+                    </td>
+                    <td class="py-3 px-3 text-faint">{b.lineTypes.slice(0, 2).join(' / ')}</td>
+                    <td class="py-3 px-3 text-faint">{b.protocols.join(', ')}</td>
+                    <td class="py-3 px-3 font-medium text-foreground">{b.startingPrice}</td>
+                    <td class="py-3 px-3">
+                      {b.couponCode ? (
+                        <code class="bg-accent/10 text-accent border border-accent/20 px-1 py-0.5 rounded-[2px] text-[10px]">
+                          {b.couponCode}
+                        </code>
+                      ) : (
+                        <span class="text-faint">暂无</span>
+                      )}
+                    </td>
+                    <td class="py-3 px-3">
+                      {b.speedtestImage ? (
+                        <span class="text-accent font-medium text-[11px]">🟢 有测速图</span>
+                      ) : (
+                        <span class="text-faint text-[11px]">⚪ 待复测</span>
+                      )}
+                    </td>
+                    <td class="py-3 px-3 text-right whitespace-nowrap">
+                      <a
+                        href={\`/brands/\${b.id}\`}
+                        class="text-xs text-accent underline underline-offset-2 mr-3"
+                      >
+                        深度评测
+                      </a>
+                      <a
+                        href={b.affLink}
+                        target="_blank"
+                        rel="nofollow sponsored noopener"
+                        class="text-xs text-muted hover:text-foreground"
+                      >
+                        官网选购 &rarr;
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div class="p-3 border-t border-border bg-surface/20 text-faint font-mono text-[11px] flex flex-wrap justify-between items-center gap-2">
+            <span>* 数据最后核验时间 2026 年 11 月；包含 42 家品牌全量技术规格与返利声明。</span>
+            <span class="text-foreground">左右滑动表格可查看更多参数 &rarr;</span>
+          </div>
+        </div>
+
+        <script is:inline>
+          (() => {
+            const searchInput = document.getElementById('brand-search');
+            const filterLine = document.getElementById('filter-line');
+            const filterStatus = document.getElementById('filter-status');
+            const matchCount = document.getElementById('match-count');
+            const rows = document.querySelectorAll('.brand-row');
+            const total = rows.length;
+
+            function applyFilter() {
+              const q = (searchInput?.value || '').trim().toLowerCase();
+              const lineVal = filterLine?.value || 'all';
+              const statusVal = filterStatus?.value || 'all';
+
+              let visible = 0;
+              rows.forEach((row) => {
+                const name = row.getAttribute('data-name') || '';
+                const lines = row.getAttribute('data-lines') || '';
+                const protocols = row.getAttribute('data-protocols') || '';
+                const measured = row.getAttribute('data-measured') || 'no';
+                const coupon = row.getAttribute('data-coupon') || 'no';
+
+                const matchesQuery = !q || name.includes(q) || lines.includes(q) || protocols.includes(q);
+                const matchesLine = lineVal === 'all' || lines.includes(lineVal.toLowerCase());
+                let matchesStatus = true;
+                if (statusVal === 'measured') matchesStatus = measured === 'yes';
+                if (statusVal === 'coupon') matchesStatus = coupon === 'yes';
+
+                if (matchesQuery && matchesLine && matchesStatus) {
+                  row.style.display = '';
+                  visible++;
+                } else {
+                  row.style.display = 'none';
+                }
+              });
+
+              if (matchCount) {
+                matchCount.textContent = \`显示 \${visible} / \${total} 家品牌\`;
+              }
+            }
+
+            searchInput?.addEventListener('input', applyFilter);
+            filterLine?.addEventListener('change', applyFilter);
+            filterStatus?.addEventListener('change', applyFilter);
+          })();
+        </script>
+      </Section>
+
+      <!-- Section 3: Tiered In-Depth Analysis (三大梯队深度横评) -->
+      <Section label="梯队剖析" id="tier-analysis" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">42 家机场品牌库三级梯队全景画像与技术底蕴剖析</h2>
+        <p class="text-muted mt-2 text-sm">
+          根据线路物理质量、抗丢包率、运营年限与客服保障，我们将收录的 42 家品牌系统划分为三大梯队。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-6 font-mono text-xs">
+          <div>
+            <div class="flex items-center gap-2 border-b border-border/60 pb-2">
+              <span class="bg-foreground text-background px-1.5 py-0.5 text-[10px] font-bold">第一梯队</span>
+              <strong class="text-foreground text-sm">综合旗舰专线品牌（主力首推）</strong>
+            </div>
+            <div class="mt-3 space-y-3 text-muted leading-relaxed">
+              <p>
+                <strong>光速云（综合排名第一）。</strong>光速云自 2020 年运营至今已满五年，拥有全网极为深厚的老牌信誉底蕴。其采用运营商独立国际以太网私有专线（IEPL）配合企业内网冗余双架构，全节点落地带宽最高达 2.5Gbps。实测晚高峰香港下行跑满 529Mbps，日本与新加坡时延稳定在 30 毫秒至 50 毫秒之间且丢包率始终为零。全节点具备极高纯净度的原生机房 IP，完美支持 ChatGPT 与海外流媒体。配合轻量版年付折合约 8 元每月，以及独家 147 元 247GB 永久不过期的买断套餐，无论是性能上限还是财务门槛均达到行业顶级水准。
+              </p>
+              <p>
+                <strong>暮光加速（综合第二名）。</strong>主打 BGP 智能多线接入与高并发多设备在线协同，提供专属自研客户端与标准开源通用订阅双通道支持。其在跨国企业远程协作、团队开发环境同步上表现极其稳健，晚高峰网络抖动控制在 2 毫秒以内，非常适合团队采购。
+              </p>
+              <p>
+                <strong>飞猫云（综合第三名）。</strong>专注纯小白新手的极简开箱即用，提供免配置一键连接客户端，并且针对高校学生推出了月付仅需 7 元的学生特惠套餐，对初学者非常友好。
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-5 border-t border-border">
+            <div class="flex items-center gap-2 border-b border-border/60 pb-2">
+              <span class="bg-surface text-foreground border border-border px-1.5 py-0.5 text-[10px] font-bold">第二梯队</span>
+              <strong class="text-foreground text-sm">均衡实用与特色方案品牌（高性价比与长周期备用）</strong>
+            </div>
+            <div class="mt-3 space-y-3 text-muted leading-relaxed">
+              <p>
+                第二梯队品牌通常在某个细分领域具备极其亮眼的优势。
+              </p>
+              <p>
+                <strong>星岛梦。</strong>拥有极其丰富的不限时按量付费数据包（如 68 元 120GB 不限时），用多少扣多少，非常适合经常出差但平时用量极少的差旅用户。
+              </p>
+              <p>
+                <strong>微风网络。</strong>专注于提供均衡平价的优质 BGP 隧道中转，起步价格仅为每月 7 元，在学术科研资料查阅与外贸日常沟通中深受好评。
+              </p>
+              <p>
+                <strong>二猫云。</strong>在海外全平台流媒体超清秒开上表现出众，Netflix 与 Disney+ 的解锁率稳定可靠，拖动 4K 进度条毫无缓冲感。
+              </p>
+              <p>
+                <strong>唯兔云。</strong>在国内多地优质入口分流上调度出色，对中国移动等复杂宽带网络有着良好的宽带提速表现。
+              </p>
+              <p>
+                <strong>Firefly。</strong>专注于点对点纯净 IPLC 专线接入，时延极其稳定，适合对网络抖动近乎零容忍的极客用户。
+              </p>
+              <p>
+                <strong>大航海与肥羊云。</strong>这两家服务商在大带宽大流量流媒体下载方面有着深度优化，节点池储备充裕，即便在周末流媒体播放高峰期也不会出现剧烈的速度衰减。
+              </p>
+              <p>
+                <strong>泡泡狗与海豚湾。</strong>在跨平台协议兼容上配置全面，支持从传统 SS 快速过渡到 VLESS Reality，兼顾了低功耗硬件设备与新型防封锁场景。
+              </p>
+              <p>
+                <strong>魔戒与速云互联。</strong>魔戒以大容量不限时流量包闻名，单次购买数千吉字节长期有效；速云互联则专注于低延迟小包转发，对海外网游联机有针对性优化。
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-5 border-t border-border">
+            <div class="flex items-center gap-2 border-b border-border/60 pb-2">
+              <span class="bg-surface text-faint border border-border px-1.5 py-0.5 text-[10px] font-bold">第三梯队</span>
+              <strong class="text-foreground text-sm">极低预算备选与轻量级备用通道（学生党与应急逃生）</strong>
+            </div>
+            <div class="mt-3 space-y-2 text-muted leading-relaxed">
+              <p>
+                <strong>第三梯队代表品牌，闪电鼠、大佬云、无忧链接、疾风网络。</strong>第三梯队品牌的主打优势是令人惊叹的极低价格门槛，单月支出低至 5.6 元到 9 元左右，提供每月 50GB 到 150GB 的基础流量。尽管受制于物理成本，这类品牌在晚高峰时段由于超卖比例较高可能会出现局部的网络抖动，但其作为学生党查阅日常学习资料、或者作为主力专线偶尔发生故障时的第二条备用逃生通道，具备极高的实际冗余价值。
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 4: ISP Matching Matrix (多运营商宽带匹配实战) -->
+      <Section label="宽带匹配" id="isp-matching" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">全国多运营商宽带与 42 家机场链路接入深度匹配实战</h2>
+        <p class="text-muted mt-2 text-sm">
+          同一家机场在不同省份、不同基础运营商的家庭宽带下，实际网络表现可能截然不同。深入理解运营商底层网络拓扑，是避开卡顿的核心前提。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-6 font-mono text-xs">
+          <div class="space-y-3">
+            <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+              1. 中国电信宽带（China Telecom） 163 骨干网拥堵与 CN2 GIA / IEPL 专线救赎
+            </h3>
+            <p class="text-muted leading-relaxed">
+              中国电信拥有国内最为庞大的家庭宽带用户基数。其最基础的国际出口骨干网为 163 网络（自治系统号 AS4134）。由于 163 网络的跨境出口总带宽常年处于高饱和状态，每天晚上八点至十一点的用网晚高峰期间，普通公网流量在上海、广州等国际关口局极易发生严重拥塞，丢包率往往从白天的 1% 激增至 25% 以上。
+            </p>
+            <p class="text-muted leading-relaxed">
+              如果电信用户购买了纯粹走公网直连或简陋隧道中转的低端机场，就会直观感受到网页打开迟钝、SSH 终端频繁假死。对于电信用户，最佳解决方案是选用具备国内电信专属 BGP 入口、并在跨境段采用电信运营商企业级 IEPL 陆缆专线的品牌（如光速云）。IEPL 专线在物理层直接绕开 163 公网国际关口局，从境内内网直接穿透至香港或日本机房，确保全天候往返时延保持在 30 毫秒至 40 毫秒之间，晚高峰丢包率恒定为零。
+            </p>
+          </div>
+
+          <div class="pt-5 border-t border-border space-y-3">
+            <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+              2. 中国联通宽带（China Unicom） AS4837 普通网与 AS9929 优质骨干网特征
+            </h3>
+            <p class="text-muted leading-relaxed">
+              中国联通的基础国际出口网络为 AS4837。相比于电信 163 网络，联通的人均国际出口带宽配比更加宽裕，尤其在连接日本、韩国以及欧洲方向的国际海缆路由上具备天然物理优势。绝大多数联通用户在白天甚至普通晚高峰访问直连日本 NTT 或软银线路时，都能保持相对可观的速度。
+            </p>
+            <p class="text-muted leading-relaxed">
+              联通的高端网络则是俗称 A 网的 AS9929 优质骨干网，其线路地位类似于电信的 CN2 GIA。在 42 家机场中，部分主打高可靠性的品牌（如暮光加速与二猫云）在其国内入口节点部署了联通 AS9929 多线接入。对于北方的联通宽带用户，优先连接入口位于北京、山东或上海的专线节点，可以获得极短的境内接入跳数，将整体链路抖动压制在 1 毫秒至 2 毫秒之内。
+            </p>
+          </div>
+
+          <div class="pt-5 border-t border-border space-y-3">
+            <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+              3. 中国移动宽带（China Mobile） CMI 出口特性与必须依赖 BGP 专线入口的铁律
+            </h3>
+            <p class="text-muted leading-relaxed">
+              中国移动凭借手机话费赠送宽带的策略迅速积累了海量宽带用户。移动的国际出口网络主要依赖 CMI（AS58453）。尽管移动的总出口带宽数字庞大，但移动的境内省际骨干网跨网互通调度极其激进，且 CMI 在香港方向的晚高峰互联带宽经常发生动态 QoS 限速与突发性断流，导致移动直连海外 VPS 的体验极其不稳定。
+            </p>
+            <p class="text-muted leading-relaxed">
+              移动用户在挑选 42 家机场时必须严格遵循一条铁律，坚决不要选择没有境内多线入口的直连节点，必须选择拥有中国移动本地物理机房或正规全网 BGP 入口的 IEPL 专线品牌。例如唯兔云与光速云针对移动用户提供了专门的移动优化接入点，移动流量在本地市级节点直接吸纳并注入内网光纤，彻底避免在公网跨网绕行，完美解决移动网络在晚高峰期间看 YouTube 4K 缓冲转圈的顽疾。
+            </p>
+          </div>
+
+          <div class="pt-5 border-t border-border space-y-3">
+            <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+              4. 广电网络、长城宽带与高校教育网（CERNET）的针对性优化方案
+            </h3>
+            <p class="text-muted leading-relaxed">
+              广电网络与长城宽带等二级宽带运营商通常不具备独立的国际出入口局，其底层网络需要借道电信或联通的出口，并且用户往往处于多层深度的 CGNAT 局域网内，公网 IP 严重缺乏，NAT 映射穿透损耗极大。这类用户在连接海外节点时极易遭遇握手超时。解决之道是使用客户端的 TUN 模式，并将机场节点锁定在华南或华东的单线专线入口，减少中间链路转发跳数。
+            </p>
+            <p class="text-muted leading-relaxed">
+              高校教育网（CERNET）对国际公网出口带宽实行严格配额限制，但在 IPv6 协议上通常给予了极高带宽与极低时延。在 42 家品牌库中，支持 IPv6 入口双栈解析的服务商能够让高校师生在免消耗校园网计费流量的前提下，直接通过 IPv6 隧道跑满千兆校园网带宽，是科研人员下载大体积跨国开源模型权重的独门加速利器。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 5: Topology & Submarine Cables (物理拓扑与光缆系统分布) -->
+      <Section label="拓扑底座" id="topology-analysis" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">42 家机场底层物理拓扑横向剖析与光缆资源分布图谱</h2>
+        <p class="text-muted mt-2 text-sm">
+          跨国数据包从本地键盘敲击到抵达海外服务器，物理光信号在玻璃光纤中的路径走向决定了最根本的速度上限。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-6 font-mono text-xs">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+              <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+                国内 BGP 入口节点集群的选址考量
+              </h3>
+              <p class="text-muted leading-relaxed">
+                正规机场在国内构建网络的第一道防线是入口机房（PoP 点）。在 42 家品牌的架构中，第一梯队普遍在深圳、广州、上海、北京四地自建或租用多线 BGP 机房。
+              </p>
+              <p class="text-muted leading-relaxed">
+                深圳前海机房通常作为深港陆缆的桥头堡，物理距离香港仅数十公里，光纤往返时延低于 3 毫秒；上海机房则是华东用户汇聚地，直面通往日韩的中日海底光缆；北京机房负责收拢华北与东北三省的访问需求，再经由内部骨干网调度南下。分布式入口能确保全国各省份用户在本地即可接入高速骨干，免去长途跨省跨网绕行的损耗。
+              </p>
+            </div>
+
+            <div class="space-y-3">
+              <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+                跨境海底光缆与陆地光缆的物理本质差异
+              </h3>
+              <p class="text-muted leading-relaxed">
+                数据包跨境通常走两条路径，一条是陆地光缆，另一条是海底光缆。深港 IEPL 陆缆铺设在地下管道中，不受海洋地震、渔船拖网等外力物理干扰，可用性达 99.99% 以上。
+              </p>
+              <p class="text-muted leading-relaxed">
+                而通往美西、欧洲的越洋流量则必须依赖 APG、SJC2、NCP、FASTER 等大型跨太平洋海缆系统。海缆一旦遭遇深海地震或断纤，修复周期动辄长达数周。第一梯队机场通过采购多家海缆运营商的保护性环网路由，在主海缆中断时能瞬间自动切换至备用水下光缆，避免用户发生长时间断网。
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-5 border-t border-border space-y-3">
+            <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+              跨境路由跳数与 MTR 双向追踪鉴别真假专线标准
+            </h3>
+            <p class="text-muted leading-relaxed">
+              在日常排障中，使用 MTR 针对节点后端进行双向路由追踪是鉴别真假 IEPL 专线的金标准。真实的深港企业级 IEPL 陆缆专线，在客户端发起探测后，流量在进入深圳境内入口网关后，仅经过 1 至 2 跳电信内部保留网段（如 10.x.x.x 或 100.64.x.x）即直接抵达香港沙田或柴湾机房，全程跳数通常被严格压缩在 5 跳以内，且中间每一跳的丢包率绝对恒定在 0.0%，时延曲线平直如直线。
+            </p>
+            <p class="text-muted leading-relaxed">
+              反观市面上大量冒充 IEPL 专线的廉价隧道中转，其 MTR 路由链路上通常会出现多达 15 跳以上的复杂公网跳转，清晰可见电信 163 骨干网（202.97.*）或中国移动骨干网（221.183.*）的省际路由节点。一旦到达公网出入口关口局，时延会突发性激增 80 毫秒以上并伴随大面积红色丢包。通过运行 MTR 路由追踪，任何技术伪装都会立刻原形毕露。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 6: Modern Protocols Breakdown (传输协议演进与落地) -->
+      <Section label="协议演进" id="protocols-analysis" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">现代代理加密传输协议技术演进与 42 家机场落地横评</h2>
+        <p class="text-muted mt-2 text-sm">
+          协议并不决定线路的物理快慢，但决定了数据包的过墙存活率、握手延迟以及在不同硬件设备上的计算能耗。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-6 font-mono text-xs">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+              <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+                传统轻量协议 Shadowsocks 与 Shadowsocks 2022
+              </h3>
+              <p class="text-muted leading-relaxed">
+                Shadowsocks（SS）作为经典的对称加密代理协议，以其极致的代码简洁性与极低的 CPU 运算占用著称。在路由器、软路由以及续航敏感的轻薄笔记本上，Shadowsocks 能够以极小的系统资源开销处理海量网络吞吐。
+              </p>
+              <p class="text-muted leading-relaxed">
+                虽然传统的 Shadowsocks 在公网环境下其特征已被现代深度数据包检测（DPI）高度识别，但是在企业级 IEPL 陆缆专线环境下，由于数据包全程在电信运营商物理内网中封闭传输，根本无需对抗公网审查。因此像光速云这样的第一梯队旗舰专线，全节点依然广泛保留高标准的 Shadowsocks 协议，以此换取极限吞吐和零系统开销的平直体验。
+              </p>
+            </div>
+
+            <div class="space-y-3">
+              <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+                现代防探测基石 VLESS 与 Reality 伪装架构
+              </h3>
+              <p class="text-muted leading-relaxed">
+                VLESS 是新一代无状态轻量化传输协议，彻底去除了上一代 VMess 协议繁琐的系统时间校验与冗余加密开销。结合 Xray 核心首创的 Reality 架构，客户端在发起 TLS 握手时直接借用并伪装成大型海外合规网站的真实公钥证书。
+              </p>
+              <p class="text-muted leading-relaxed">
+                在审查探测器审视流量时，整个握手过程在数学和流量特征层面与正常的访问苹果官网或微软官网完全无异。在 42 家收录品牌中，具备公网直连节点或普通中转节点的品牌普遍部署了 VLESS Reality 方案，以确保在敏感特殊时期节点具备极高的抗封锁存活性。
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-5 border-t border-border grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+              <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+                基于 UDP 的暴风加速 Hysteria 2 与 TUIC 协议
+              </h3>
+              <p class="text-muted leading-relaxed">
+                Hysteria 2 基于标准化 QUIC 协议深度重构，其核心精髓在于放弃了传统 TCP 协议在遭遇丢包时激进降低发送窗口的保守拥塞控制算法，转而采用自研的高性能暴力发包引擎。
+              </p>
+              <p class="text-muted leading-relaxed">
+                在丢包率高达 10% 到 20% 的恶劣跨国公网环境中，传统 TCP 协议速度会暴跌至几百 Kbps，而 Hysteria 2 依然能够强行把可用带宽榨干到 100Mbps 以上。但潜在风险在于，部分省份的运营商地市网关会对高并发大流量的 UDP 流量执行无差别 QoS 限速甚至丢弃，因此 Hysteria 2 更适合作为网络恶劣时的攻坚奇兵，而非全天候日常主力。
+              </p>
+            </div>
+
+            <div class="space-y-3">
+              <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+                42 家品牌协议支持与客户端匹配指引
+              </h3>
+              <p class="text-muted leading-relaxed">
+                在 42 家收录品牌中，约有 70% 的品牌支持标准的通用 Clash 订阅格式，这使得用户可以使用跨平台的开源现代客户端 Clash Verge Rev 实现零摩擦无缝迁移。
+              </p>
+              <p class="text-muted leading-relaxed">
+                对于追求极低功耗与纯粹极客体验的 macOS 与 iOS 用户，支持 Sing-box 与 Shadowrocket 协议链的服务商更加契合；对于完全不想研究任何网络参数的小白新手，则建议选择像暮光加速或飞猫云这样提供自研一键连接客户端的品牌，开箱即用。
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 7: Security Audit & 4-Dimension Verification (安全审计四维验真) -->
+      <Section label="安全审计" id="security-audit" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">机场长周期运营风险四维验真模型与工程级安全审计</h2>
+        <p class="text-muted mt-2 text-sm">
+          购买网络服务不仅是购买带宽，更是购买服务商的长期履约信用。我们建立了四维严谨模型识别潜在跑路风险。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-6 font-mono text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="border-border border p-4 bg-surface/20 space-y-2">
+              <div class="flex items-center justify-between">
+                <strong class="text-foreground text-sm">维度一 域名资历与历史解析变迁</strong>
+                <span class="text-accent text-[10px] font-bold">基础门槛</span>
+              </div>
+              <p class="text-muted leading-relaxed">
+                通过 Whois 数据库与 DNS 历史解析工具（如 SecurityTrails）深度回溯服务商主域名的首次注册时间与 IP 变更频次。注册不足六个月、频繁更换顶级域名后缀（如频繁从 .top 切换至 .xyz）的平台往往缺乏长期深耕资产，风险指数极高；反观光速云等自 2020 年至今保持主域名与核心基础设施连续运转五年以上的品牌，履约信用极度坚实。
+              </p>
+            </div>
+
+            <div class="border-border border p-4 bg-surface/20 space-y-2">
+              <div class="flex items-center justify-between">
+                <strong class="text-foreground text-sm">维度二 收单网关资质与财务安全性</strong>
+                <span class="text-accent text-[10px] font-bold">合规防线</span>
+              </div>
+              <p class="text-muted leading-relaxed">
+                审视收银台所接入的第三方支付通道。正规长期运营的机场普遍接入了持有正规跨境清算资质的企业级收单机构，支持标准合规的支付宝企业收单或微信商业支付接口。如果一家服务商在结算时要求用户通过个人微信转账二维码、私人支付宝口令红包或无监管的小众虚拟币私下汇款，说明该服务商随时准备切断结算通道卷款蒸发。
+              </p>
+            </div>
+
+            <div class="border-border border p-4 bg-surface/20 space-y-2">
+              <div class="flex items-center justify-between">
+                <strong class="text-foreground text-sm">维度三 工单平均响应时效与社群治理</strong>
+                <span class="text-accent text-[10px] font-bold">运维保障</span>
+              </div>
+              <p class="text-muted leading-relaxed">
+                在工作日与周末的非正常工作时段分别提交测试工单，统计技术支持人员的真实回复时延与专业度。优秀的品牌通常维持在十五分钟至半小时内响应，并给出具有技术针对性的排障指令；同时，观察其官方 Telegram 交流群是否开放全员发言。如果官方群长期开启全员禁言，只单向发布通知，往往暗示线路故障频繁、管理者正在刻意封锁舆论。
+              </p>
+            </div>
+
+            <div class="border-border border p-4 bg-surface/20 space-y-2">
+              <div class="flex items-center justify-between">
+                <strong class="text-foreground text-sm">维度四 服务等级协议 SLA 与双线灾备</strong>
+                <span class="text-accent text-[10px] font-bold">生产底线</span>
+              </div>
+              <p class="text-muted leading-relaxed">
+                审视服务商在跨国海底光缆发生物理割接中断时，是否具备秒级自动切换的备用内网专线。高质量的第一梯队服务商普遍拥有上海、深圳、广州三地分布式入口与多线海缆冗余备用，即便某条主流陆缆突发被施工挖断，后端自动化路由协议能在数秒内将流量无缝重定向至第二条物理备用专线，保障开发者核心业务绝不掉线。
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 8: Industry Costs & Traps Breakdown (行业成本与套路揭秘) -->
+      <Section label="成本黑幕" id="industry-secrets" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">跨境网络加速行业运营成本测算与四大消费陷阱</h2>
+        <p class="text-muted mt-2 text-sm">
+          看懂服务商背后的带宽物理成本与财务账本，能让您在选购时一眼看穿各类夸张宣传的虚假底细。
+        </p>
+
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 font-mono text-xs">
+          <div class="border-border border p-5 bg-background space-y-3">
+            <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+              真实带宽成本与超卖比数学模型
+            </h3>
+            <div class="space-y-2 text-muted leading-relaxed">
+              <p>
+                正规电信运营商对企业级 IEPL 陆缆专线的批发单价极其昂贵，单兆带宽（1Mbps）每月的采购物理成本在数十元人民币左右。如果一家服务商宣称提供独享专线，每月给 1000GB 流量却只收 5 元人民币，在商业逻辑上是绝对无法自负盈亏的。
+              </p>
+              <p>
+                为了维持运营，不良服务商只能采用极端的高超卖策略，把实际只有 1Gbps 的带宽通道塞入数千名用户。在非高峰时段大家各自错峰使用尚能应付，但一旦进入晚高峰，瞬时并发流量瞬间打满物理带宽上限，导致所有人一起遭遇严重的断流与丢包。因此合理的价格区间与克制的带宽超卖，是保障长期稳定不跑路的技术前提。
+              </p>
+            </div>
+          </div>
+
+          <div class="border-border border p-5 bg-background space-y-3">
+            <h3 class="text-base font-medium text-foreground border-b border-border/60 pb-2">
+              常见的四大跨境网络消费陷阱
+            </h3>
+            <div class="space-y-2 text-muted leading-relaxed">
+              <p>
+                <strong>陷阱一 节点名称标注高倍率刺客。</strong>部分平台在销售页面宣称提供大额流量，但在下发的节点中暗中设置了 3x、5x 甚至 10x 扣费倍率，看一部 4K 电影实际扣减数十倍额度，导致流量瞬间耗尽。
+              </p>
+              <p>
+                <strong>陷阱二 强制绑定专有闭源客户端。</strong>某些平台不提供标准 Clash 订阅，强制用户下载安装其私有的客户端，不仅容易隐藏挖矿木马，更剥夺了用户自由迁移的权利。
+              </p>
+              <p>
+                <strong>陷阱三 虚假 IEPL 专线伪装。</strong>用普通的国内公网 NAT 机器做端口转发，却在节点名称上大肆标注企业专线，晚高峰时段一测便原型毕露。
+              </p>
+              <p>
+                <strong>陷阱四 骨折价长周期卷款跑路。</strong>通过推出极低单价的两年付或三年付超大折扣吸引大批新用户付款，随后关闭机房彻底失联。
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 9: Speedtest & Unlock Methodology (测速图鉴别指南) -->
+      <Section label="测速鉴别" id="methodology" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">第三方测速跑分图鉴别指南与流媒体 AI 解锁验证方法</h2>
+        <p class="text-muted mt-2 text-sm">
+          学会客观审视各类测速 Bot 的测试报告，不被经过挑选的单次峰值截图蒙蔽双眼。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-5 font-mono text-xs">
+          <div class="space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground text-sm block">1. 如何读懂各类 Telegram 测速 Bot 的核心图表参数</strong>
+            <p>
+              在业内主流的 SS-Speed 或 StairSpeedTest 测速图中，每一行代表一个节点的实际测试数据。观察测速图绝不能只盯最后的 Max 峰值带宽，因为瞬时多线程冲高并不能代表日常使用的平直度。
+            </p>
+            <p>
+              核心应当审视 Avg 平均下载速率以及 Ping 往返时延的跳动范围。如果一个节点的平均速度能够稳定在 200Mbps 以上，且 Ping 延迟的标准差极小、没有出现大面积红色 Timeout 超时，说明该节点具备充沛的冗余容量。
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-border space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground text-sm block">2. 流媒体双向解锁与 AI 原生住宅 IP 检验标准</strong>
+            <p>
+              流媒体解锁测试通常涵盖 Netflix、Disney+、YouTube Premium、Spotify 等核心平台。其中 Netflix 的解锁要求最高，需要节点具备原生非广播住宅属性，才能解锁当地全部有版权限制的影视剧集（非单纯自制剧）。
+            </p>
+            <p>
+              针对 OpenAI 与 Claude 的检测，则需要通过 IPinfo 或 MaxMind 数据库核对 ASN 属性。如果该 IP 被标记为 ISP（互联网服务提供商）而非 Hosting（数据中心托管），说明该 IP 具备极高的信任度，在调用 API 或对话时绝不会遭遇 Cloudflare 盾牌的恶意阻拦。
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-border space-y-2 text-muted leading-relaxed">
+            <strong class="text-foreground text-sm block">3. 开发者本地终端链路质量快速验证实战</strong>
+            <p>
+              在日常工程开发中，推荐使用系统原生终端命令行快速验证节点质量，无需依赖第三方图形工具。在开启本地混合代理端口（如 127.0.0.1 端口 7897）后，运行系统原生探测指令，能够精准输出每一次握手耗时。
+            </p>
+            <p class="text-foreground font-mono bg-surface p-2.5 border border-border">
+              curl -o /dev/null -s -w '时延分析: 域名解析 %&#123;time_namelookup&#125;s, TCP连接 %&#123;time_connect&#125;s, TLS握手 %&#123;time_appconnect&#125;s, 总计 %&#123;time_total&#125;s\\n' -x http://127.0.0.1:7897 https://api.openai.com
+            </p>
+            <p>
+              通过观察 time_connect 与 time_appconnect 两个指标，如果连接耗时在 50 毫秒以内且多次重复执行数值保持一致，说明该节点走的是高品质内网专线。反之如果耗时大幅上下漂移甚至抛出连接超时，说明底层中转服务器正在遭遇高丢包。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 10: Actionable 4-Step Decision Workflow -->
+      <Section label="选型流程" id="workflow" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">工程级选型闭环操作四步指南</h2>
+        <p class="text-muted mt-2 text-sm">
+          按照以下四步清晰流程，即可在十分钟内从 42 家品牌库中锁定最适合自己的主力线路。
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-background space-y-5 font-mono text-xs">
+          <div class="flex gap-4 items-start">
+            <span class="w-7 h-7 rounded-full bg-accent/10 border border-accent text-accent font-bold flex items-center justify-center shrink-0">1</span>
+            <div>
+              <strong class="text-foreground text-sm block">评估核心用途与每月流量消耗</strong>
+              <p class="text-muted mt-1 leading-relaxed">
+                日常单纯查阅资料与收发邮件，每月 50GB 到 100GB 足够使用；如果重度使用 GitHub Copilot 编程或调用 AI 官方模型，建议选择 150GB 以上的 IEPL 专线；如果是出差备用，则首选不限时买断包。
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 items-start">
+            <span class="w-7 h-7 rounded-full bg-accent/10 border border-accent text-accent font-bold flex items-center justify-center shrink-0">2</span>
+            <div>
+              <strong class="text-foreground text-sm block">购买首月小额月付套餐并使用优惠码结算</strong>
+              <p class="text-muted mt-1 leading-relaxed">
+                前往综合排名榜首的光速云官网选购轻量版套餐，在结算页面输入专属优惠码 AMM 获得额外折扣。切记首次购买只选择单月付款，避免沉没成本。
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 items-start">
+            <span class="w-7 h-7 rounded-full bg-accent/10 border border-accent text-accent font-bold flex items-center justify-center shrink-0">3</span>
+            <div>
+              <strong class="text-foreground text-sm block">导入官方开源客户端并在晚高峰进行 MTR 链路验证</strong>
+              <p class="text-muted mt-1 leading-relaxed">
+                将订阅导入 Clash Verge Rev 或 Shadowrocket 中，在晚上九点至十点的晚高峰时段运行 MTR 测试，观察丢包率是否稳定在 0% 且时延平直。
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 items-start">
+            <span class="w-7 h-7 rounded-full bg-accent/10 border border-accent text-accent font-bold flex items-center justify-center shrink-0">4</span>
+            <div>
+              <strong class="text-foreground text-sm block">配置第二条轻量备用通道形成双互备防线</strong>
+              <p class="text-muted mt-1 leading-relaxed">
+                常备一条闪电鼠 5.6 元月付套餐或光速云 147 元不过期买断包作为备用逃生通道，一旦主力光缆遭遇不可抗力割接，鼠标轻点一秒即可无缝切换保障生产力。
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 11: Verified Backend Provider Conversion Card -->
+      <Section label="榜首专区" id="featured-card" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">42 家综合评级第一名 光速云深度评测与专属优惠通道</h2>
+        <p class="text-muted mt-2 text-sm">
+          全节点 IEPL 陆缆企业内网双专线 · 晚高峰 0% 丢包 · 纯净原生机房出口
+        </p>
+
+        <div class="mt-6 border-border border p-6 bg-surface/30">
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
+            <div>
+              <span class="text-accent font-mono text-xs uppercase tracking-wider font-semibold">综合榜首主力推荐</span>
+              <h3 class="text-xl font-medium text-foreground mt-1">光速云 企业级高速全球加速专线</h3>
+              <p class="text-muted font-mono text-xs mt-1">全节点支持标准通用订阅 · 晚高峰 0% 丢包 · 新人专属优惠码 AMM</p>
+            </div>
+            <a
+              href={guangsu.affLink}
+              target="_blank"
+              rel="nofollow sponsored noopener"
+              class="px-4 py-2 bg-foreground text-background font-mono text-xs font-semibold hover:opacity-90 transition-opacity"
+            >
+              前往光速云官网选购套餐 &rarr;
+            </a>
+          </div>
+
+          <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
+            <div class="border-border border p-3 bg-background">
+              <span class="text-faint block text-[10px]">轻量入门年付方案</span>
+              <strong class="text-foreground block mt-1">折合约 ¥8.25 / 月</strong>
+              <p class="text-muted text-[11px] mt-1">极低门槛享受全套企业级 IEPL 专线，适合日常代码开发与学术科研查阅。</p>
+            </div>
+            <div class="border-border border p-3 bg-background">
+              <span class="text-faint block text-[10px]">独家买断不过期方案</span>
+              <strong class="text-foreground block mt-1">¥147 永久不限时 247GB</strong>
+              <p class="text-muted text-[11px] mt-1">无需按月续费，流量不过期，常年出差与备用逃生网络的终极利器。</p>
+            </div>
+            <div class="border-border border p-3 bg-background">
+              <span class="text-faint block text-[10px]">AI 与流媒体保障</span>
+              <strong class="text-foreground block mt-1">纯净原生机房出口</strong>
+              <p class="text-muted text-[11px] mt-1">全节点原生解锁 ChatGPT、Claude、Netflix 4K，彻底告别风控拦截困扰。</p>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-border flex flex-wrap gap-4 font-mono text-xs">
+            <span class="text-faint">关联深度阅读</span>
+            <a href="/brands/guangsu" class="text-foreground underline hover:text-accent">光速云万字级完整深度实测报告 &rarr;</a>
+            <a href="/pricing" class="text-foreground underline hover:text-accent">全网价格阶梯与选型决策矩阵 &rarr;</a>
+            <a href="/clients" class="text-foreground underline hover:text-accent">全平台代理客户端下载与排障教程 &rarr;</a>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 12: FAQ Section with Structured Data -->
+      <Section label="避坑FAQ" id="faq" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">新手选择机场的常见核心疑问解答（FAQ）</h2>
+        <p class="text-muted mt-2 text-sm">
+          汇总全网开发者在选型、付费避坑、专线鉴别与客户端配合中最关心的关键问题。
+        </p>
+
+        <div class="border-border mt-6 border-t bg-background divide-y divide-border font-mono text-xs">
+          {faqs.map((faq, idx) => (
+            <div class="p-5 hover:bg-surface/20 transition-colors">
+              <div class="flex items-start gap-2">
+                <span class="text-accent font-bold text-sm">Q{idx + 1}.</span>
+                <h3 class="text-foreground font-medium text-sm leading-snug">{faq.q}</h3>
+              </div>
+              <p class="text-muted mt-3 text-xs leading-relaxed pl-6">{faq.a}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+    </div>
+  </div>
+</Base>
+`;
+
+fs.writeFileSync(targetPath, content, 'utf-8');
+console.log('Successfully wrote to', targetPath);

@@ -1,24 +1,65 @@
 /*
-  theme.css -- your overrides. This is the file to edit to retheme the site.
-
-  Every token lives in src/styles/tokens.css with its default value. Declarations
-  here are unlayered, so they win without specificity tricks.
-
-  Colors are defined with light-dark(). Overriding with a plain color changes
-  light and dark mode at once; use light-dark(<light>, <dark>) to keep them apart.
-  Webfonts are loaded in astro.config.mjs; use overrides here for system fonts.
-
-  Whatever you change here, `pnpm check:contrast` measures every pair again: a colour
-  nobody can read is the one bug this theme cannot ship with.
-
-  Example:
-
-  :root {
-    --primary: light-dark(#8c1f2f, #e08792);
-    --font-body: Charter, 'Iowan Old Style', Georgia, serif;
-    --radius: 0;
-  }
+  src/styles/theme.css -- Typography and layout overrides for GitHub指南 (githubzhinan.blog)
+  Strict adherence to Quarry's technical reference design discipline:
+  - Rules and numbers over shadows and cards
+  - High contrast WCAG AA compliance
+  - Clean Chinese typographic rhythm and line heights
 */
 
 :root {
+  /* Chinese-friendly font stack fallback */
+  --font-body: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+/* Enhanced Chinese prose reading rhythm */
+.prose {
+  line-height: 1.82;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  text-align: justify;
+}
+
+.prose p {
+  margin-block-end: 1.35rem;
+}
+
+.prose h2 {
+  margin-block-start: 2.75rem;
+  margin-block-end: 1rem;
+  letter-spacing: -0.015em;
+  font-weight: 500;
+}
+
+.prose h3 {
+  margin-block-start: 2rem;
+  margin-block-end: 0.75rem;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
+
+.prose li {
+  line-height: 1.75;
+}
+
+/* Terminal & table scroll containers */
+.table-scroll,
+.code-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius);
+}
+
+/* Callout notes inside articles and reviews */
+.callout {
+  border-inline-start: 3px solid var(--primary);
+  background-color: var(--surface);
+  padding: 0.875rem 1.125rem;
+  margin-block: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.callout--warning {
+  border-inline-start-color: var(--danger);
 }

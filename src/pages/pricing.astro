@@ -1,128 +1,737 @@
 ---
-// Pricing. The plans are the `plans` collection; the questions below them are page
-// copy, because they are about billing, not about any one plan.
 import Base from '../layouts/Base.astro';
 import Section from '../components/common/Section.astro';
-import { getPlans, money } from '../lib/content';
-import { ui } from '../config';
+import { getBrandById } from '../data/brands';
 
-const plans = await getPlans();
+const guangsu = getBrandById('guangsu')!;
 
-const questions = [
+const tiers = [
   {
-    q: 'What happens at the end of the two years?',
-    a: 'The version you have keeps working, with no reduced mode and no nag. You stop receiving new versions. A renewal costs half the original price and starts another two years from the day it is bought.',
+    id: 'budget',
+    name: '极低预算轻量入门档',
+    price: '¥5.6 - ¥15',
+    unit: ' / 月',
+    tagline: '适合日常网页查资料、收发海外邮件、学生轻度学术科研与突发备用通道',
+    targetAudience: '预算极其有限、月均流量在 100GB 以内的学生与轻度用户',
+    brands: ['闪电鼠 (¥5.6/月起)', '大佬云 (¥5.6/月起)', '飞猫云 (¥7/月学生包)', '微风网络 (¥7/月起)'],
+    features: [
+      '每月提供 50GB 到 150GB 基础下行流量',
+      '三网优化中转或入门级公网隧道接入',
+      '支持全平台常用客户端（Clash/v2rayN/小火箭）一键导入',
+      '满足 Google 搜索、GitHub 代码浏览与维基百科查阅',
+      '极低试错门槛，按月购买毫无财务压力',
+    ],
+    limitations: [
+      '晚高峰期间（20:30 到 22:30）存在局部丢包与延迟波动',
+      '节点大多为共享数据中心 IP，不保证 100% 解锁 ChatGPT 与海外流媒体',
+      '大部分入门套餐限制 2 到 3 台设备同时在线',
+    ],
+    cta: { label: '查看低预算品牌横评', href: '/brands#all-brands' },
+    featured: false,
   },
   {
-    q: 'Can I move a licence to another machine?',
-    a: 'There is nothing to move. The key is checked offline against a signature, so the same key works on every machine you sit at. It is one person, not one computer.',
+    id: 'flagship',
+    name: '顶级旗舰 IEPL 专线档',
+    price: '¥20 - ¥35',
+    unit: ' / 月',
+    tagline: '主力推荐档位：企业内网独立光缆直通，晚高峰零丢包，全平台 AI 与 4K 全解锁',
+    targetAudience: '重度依赖 GitHub Copilot、ChatGPT、Claude 编程及海外协同的工程师',
+    brands: ['光速云 (综合榜首首选)', '暮光加速 (BGP专线协同)', '二猫云 (高性价比专线)', '唯兔云 (三网负载优化)'],
+    features: [
+      '采用国际以太网私有专线（IEPL），全程内网陆缆传输，完全不经公共国际出口网关',
+      '单节点最高带宽达 2.5Gbps，实测晚高峰香港下行 529Mbps，丢包率始终为零',
+      '海外出口具备纯净原生机房 IP，原生支持 ChatGPT、Claude 与 Gemini 认证',
+      'Netflix、Disney+、YouTube 4K 超清秒开，拖动进度条无需缓冲',
+      '支持自研免配置客户端与第三方通用订阅双通道，具备自动故障转移机制',
+    ],
+    limitations: [
+      '单月购买单价略高于入门中转，但在长线稳定性和防封号价值上完全覆盖溢价',
+    ],
+    cta: { label: '查看第一名光速云实测', href: '/brands/guangsu' },
+    featured: true,
   },
   {
-    q: 'What counts as a person on the Team plan?',
-    a: 'Anyone who runs Quarry. Seats are named rather than concurrent, and you can change who holds one at any time by writing to us.',
+    id: 'payg',
+    name: '一次性不限时买断档',
+    price: '¥100 - ¥200',
+    unit: ' / 一次性买断',
+    tagline: '终身无月租、无到期清零限制，用多少扣多少，常年出差与备用逃生首选',
+    targetAudience: '用量极不稳定、经常出差、或已经有主力梯子需要高可靠备用的用户',
+    brands: ['光速云致敬斯诺克 (¥147/247GB永久不过期)', '星岛梦不限时包', '灵猫网络小流量包'],
+    features: [
+      '一次付费彻底买断，只要账户内剩余流量未耗尽，永久有效且不设截止日期',
+      '享有与高价月付套餐完全相同的全部 IEPL 专线与全球原生节点矩阵',
+      '彻底消除传统月付套餐到期未用完流量直接清零的心理损耗',
+      '完美作为开发机、手机热点与跨国差旅期间的紧急逃生备用网络',
+      '单次支出后长达数年无需再次维护支付，财务成本极为清晰',
+    ],
+    limitations: [
+      '单次付款门槛通常在百元以上，不适合仅需短期使用几天的临时访客',
+      '一旦流量自然消耗完毕需要重新购买新的买断数据包',
+    ],
+    cta: { label: '查看光速云 147 永久套餐', href: '/brands/guangsu#plans' },
+    featured: false,
   },
   {
-    q: 'Do you invoice?',
-    a: 'Yes, for Team purchases and for any purchase over five seats. Purchase orders and a VAT number on the invoice are both fine. Write before you buy and we will send the invoice first.',
+    id: 'enterprise',
+    name: '企业出海与独享定制档',
+    price: '¥500 - ¥680',
+    unit: ' / 月',
+    tagline: '独享单人原生固定 IP、大带宽物理隔离，跨境电商与海外直播防关联必备',
+    targetAudience: '出海跨国团队、TikTok 直播运营、亚马逊/独立站跨境店铺防封关联企业',
+    brands: ['光速云定制版 (¥680/月 500G独享)', '肥猫云企业专包', '青云梯定制通道'],
+    features: [
+      '为每位企业用户或团队单独分配独享海外原生固定 IP 与物理独立带宽，彻底隔离邻居干扰',
+      '从根本上杜绝公用节点由于他人违规引发的关联封禁与平台风控风险',
+      '提供高可用网络服务等级协议（SLA）保障与 7×24 小时技术团队一对一响应',
+      '不限制同时在线客户端与员工终端数量，支持全团队多环境统一协同',
+      '支持正规对公账户转账结算与开具正规增值税专用发票',
+    ],
+    limitations: [
+      '月度成本相对较高，普通个人日常学习与娱乐没有必要选择此档位',
+    ],
+    cta: { label: '查看光速云企业定制详情', href: '/brands/guangsu#plans' },
+    featured: false,
+  },
+];
+
+const priceMatrixData = [
+  {
+    rank: 1,
+    name: '光速云',
+    slug: 'guangsu',
+    monthlyPrice: '¥25.00',
+    yearlyAvgPrice: '¥8.25',
+    paygPrice: '¥147 (247G永久)',
+    lineType: 'IEPL专线 + 企业内网',
+    protocol: 'VLESS / SS',
+    speed: '最高 2.5Gbps',
+    deviceLimit: '不限设备',
+    aiUnlock: '原生解锁 (免验证)',
+    streaming: '全区 4K 秒开',
+    coupon: 'AMM',
+    testedStatus: '实测通过 (529Mbps)',
   },
   {
-    q: 'What is the refund policy?',
-    a: 'Thirty days, no reason needed. The free version exists so that you can answer the only question a refund usually settles, which is whether it is fast enough on your archive.',
+    rank: 2,
+    name: '暮光加速',
+    slug: 'muguang',
+    monthlyPrice: '¥20.00',
+    yearlyAvgPrice: '¥15.00',
+    paygPrice: '无',
+    lineType: 'BGP优质专线中转',
+    protocol: 'Shadowsocks / Trojan',
+    speed: '最高 1.0Gbps',
+    deviceLimit: '5 台设备',
+    aiUnlock: '支持',
+    streaming: '4K 解锁',
+    coupon: '无',
+    testedStatus: '实测通过',
+  },
+  {
+    rank: 3,
+    name: '飞猫云',
+    slug: 'feimao',
+    monthlyPrice: '¥15.00',
+    yearlyAvgPrice: '¥7.00',
+    paygPrice: '无',
+    lineType: '三网优化隧道中转',
+    protocol: 'Shadowsocks',
+    speed: '500Mbps',
+    deviceLimit: '3 台设备',
+    aiUnlock: '部分节点支持',
+    streaming: '高清解锁',
+    coupon: 'FC666',
+    testedStatus: '实测通过',
+  },
+  {
+    rank: 4,
+    name: '微风网络',
+    slug: 'weifeng',
+    monthlyPrice: '¥12.00',
+    yearlyAvgPrice: '¥7.50',
+    paygPrice: '无',
+    lineType: '多线 BGP 隧道中转',
+    protocol: 'VLESS / Trojan',
+    speed: '500Mbps',
+    deviceLimit: '3 台设备',
+    aiUnlock: '支持',
+    streaming: '全解锁',
+    coupon: '无',
+    testedStatus: '实测通过',
+  },
+  {
+    rank: 6,
+    name: '星岛梦',
+    slug: 'xingdaomeng',
+    monthlyPrice: '¥16.00',
+    yearlyAvgPrice: '¥10.00',
+    paygPrice: '¥68 (120G不限时)',
+    lineType: '优质隧道中转',
+    protocol: 'Shadowsocks',
+    speed: '800Mbps',
+    deviceLimit: '4 台设备',
+    aiUnlock: '支持',
+    streaming: '4K 解锁',
+    coupon: '无',
+    testedStatus: '实测通过',
+  },
+  {
+    rank: 22,
+    name: '闪电鼠',
+    slug: 'shandianshu',
+    monthlyPrice: '¥5.60',
+    yearlyAvgPrice: '¥4.50',
+    paygPrice: '无',
+    lineType: '直连优化 / 基础中转',
+    protocol: 'Shadowsocks',
+    speed: '300Mbps',
+    deviceLimit: '2 台设备',
+    aiUnlock: '不稳定',
+    streaming: '1080P 解锁',
+    coupon: '无',
+    testedStatus: '厂商核验数据',
+  },
+];
+
+const faqs = [
+  {
+    q: '为什么有些机场标称价格低至每月几元，而高端专线需要二三十元？',
+    a: '价格差距的根源在于底层物理带宽成本与超卖比。每月几元的廉价机场使用的是公共公网海缆出口或者合租的廉价 VPS，晚高峰期间成百上千人抢占几百兆公网出口，丢包率往往高达 30% 以上，且 IP 极易被 OpenAI 等服务批量封杀。而每月二十多元的 IEPL 专线租用持牌运营商独立的物理陆缆内网，不走公共国际公网出口，晚高峰丢包率为零，并配备专有原生机房 IP，单兆带宽成本是前者的数十倍。',
+  },
+  {
+    q: '购买机场套餐时，选择“月付”还是“年付”更划算？',
+    a: '对于初次接触的新品牌，第一准则永远是先买一个月进行实测。跨境网络环境复杂，不同地区、不同宽带（电信、联通、移动）在晚高峰的体验差异极大。只有在连续使用满一个月、确认本地网络晚高峰平直稳定之后，再结合年付优惠（如光速云轻量版年付折合仅 8 元/月）进行长期订阅。切忌在没有任何实际测试的情况下盲目购买不知名小机场的多年大包。',
+  },
+  {
+    q: '套餐内的流量是按什么规则计算的，倍率节点是什么意思？',
+    a: '正规机场以用户实际产生的上传与下载数据量之和计算流量消耗。但必须特别注意节点的倍率参数。如果某个特殊高速专线节点标记为 2.0x 倍率，意味着你下载 1GB 文件，系统会在后台扣除 2GB 套餐额度。反之，标记为 0.5x 的节点下载 1GB 只扣除 500MB。在选购时不仅要看标称总流量，还要确认主力节点是否为标准的 1.0x 倍率。',
+  },
+  {
+    q: '光速云的 147 元 247GB 永久套餐和普通月付套餐相比有什么优势？',
+    a: '普通月付套餐的额度在每个计费周期（30天）结束时会自动清零，未用完的流量无法累积，对于每个月仅出差几天或偶尔查资料的用户来说存在明显的隐形浪费。光速云致敬斯诺克 147 元套餐属于一次性买断性质，终身不过期且不限设备数量，只要 247GB 额度未耗尽就可以一直使用，同时享有光速云顶级的 IEPL 专线与全球节点速度，非常适合作为高可靠的长期备用梯子。',
+  },
+  {
+    q: '为什么有些服务商不支持微信或支付宝，只支持 USDT 等虚拟货币？',
+    a: '支持支付宝与微信直接付款的服务商，通常接入了合规的第三方跨境商业支付网关，具备较高的运营成本与商业实体门槛，跑路风险相对较低。而仅支持加密货币支付的平台匿名性极强，一旦发生机房变故或运营方跑路，用户在现实中没有任何追索或争议退款途径。建议普通个人用户优先选择支持主流便捷移动支付渠道的品牌。',
+  },
+  {
+    q: '套餐标注的“同时在线设备数”是如何判定的？',
+    a: '节点服务器通过统计同一订阅在短时间内的不同公共 IP 来源或并发 TCP 会话数来判定设备数量。如果套餐限制 2 台设备，意味着如果你同时在手机、笔记本和台式机三端开启代理并发起网络请求，第三台设备可能会遭遇连接被拒或降速。家庭或小型研发团队多设备共用时，应优先选择明确标注不限制在线设备的套餐。',
+  },
+  {
+    q: '如果套餐流量在月度结算日前用完了怎么办？',
+    a: '大部分规范运营的机场允许用户在控制台以原价提前重置套餐周期，或者单独购买临时的按量流量叠加包。极少数低质机场在流量用尽后会直接完全断网且无法充值。在选购时可以提前在控制台确认是否具备流量重置与工单自动响应功能。',
+  },
+  {
+    q: '为什么使用国外大模型时，部分节点即使有网也频繁提示 Access Denied？',
+    a: '这是由于节点海外出口的 IP 纯净度不达标造成的。OpenAI 与 Anthropic 会接入第三方商业安全威胁情报库，将大型共享数据中心的公网 IP 批量列入风控名单。解决该问题需要认准带有原生住宅或独享纯净出口的专线节点，并在客户端开启虚拟网卡 TUN 模式杜绝本地 IPv6 与 DNS 泄漏。',
+  },
+];
+
+const pageTitle = '2026 机场价格方案大表与场景选型决策矩阵 · GitHub 指南';
+const pageDescription = '深度剖析 42 家机场价格梯度：从月付 5.6 元极低门槛、25 元旗舰 IEPL 专线，到 147 元不过期买断包与企业独享定制，提供真实成本拆解与科学选型指南。';
+
+const jsonLd = [
+  {
+    '@type': 'WebPage',
+    name: pageTitle,
+    description: pageDescription,
+    url: 'https://githubzhinan.blog/pricing/',
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: f.a,
+      },
+    })),
   },
 ];
 ---
 
-<Base
-  title="Pricing"
-  description="Quarry is free up to 20,000 files. Pro is six dollars a month and includes two years of updates."
->
+<Base title={pageTitle} description={pageDescription} jsonLd={jsonLd}>
   <div class="shell">
-    <div class="shell-body pt-14 pb-16 sm:pt-20">
-      <h1 class="text-3xl font-medium tracking-[-0.028em] sm:text-4xl">
-        One price, and a free version that is not a demo.
-      </h1>
-      <p class="text-muted mt-5 text-lg">
-        The free build indexes 20,000 files and never expires. Pro lifts the ceiling and turns on
-        the parts that other programs talk to. Prices are in US dollars and exclude any tax your
-        country adds.
+    <!-- Header Hero -->
+    <div class="shell-body pt-14 pb-12 sm:pt-20">
+      <nav aria-label="面包屑" class="font-mono text-[11px] text-faint flex items-center gap-2 mb-4">
+        <a href="/" class="hover:text-foreground no-underline">首页</a>
+        <span>/</span>
+        <span class="text-foreground">场景选型决策矩阵</span>
+      </nav>
+
+      <p class="text-faint font-mono text-[11px]">
+        4 档主流价位 · 5 大应用场景 · 拒绝盲目消费 · 真实网络成本透明拆解
       </p>
+      <h1 class="mt-3 text-3xl font-medium tracking-[-0.028em] sm:text-4xl text-foreground">
+        2026 机场价格阶梯与场景选型决策矩阵
+      </h1>
+      <p class="text-muted mt-4 text-base sm:text-lg leading-relaxed">
+        买机场不是越贵越好，也不是越便宜越赚，关键在于底层网络架构是否精准匹配您的实际工作流。
+        重度依赖 GitHub Copilot 与 ChatGPT 的研发人员需要零丢包的原生专线，轻度文献检索的学者只需入门中转，而常年差旅者则更适合不设过期时限的买断大包。
+        本篇决策专著基于我们对市场上 42 家主流机场的深度测速与套餐审计，为您全面理清每分钱背后的真实网络价值。
+      </p>
+
+      <!-- Quick Decision Verdict Bar (Module 1: Direct Answer at the Top) -->
+      <div class="border-border mt-8 p-5 border bg-surface/40 rounded-[2px] font-mono text-xs">
+        <span class="text-primary font-semibold flex items-center gap-2">
+          <span>⚡</span> 30 秒省流直通结论
+        </span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-3">
+          <div class="border-border border p-3 bg-background">
+            <span class="text-faint text-[10px]">主力开发 / AI办公首选</span>
+            <p class="font-bold text-foreground text-sm mt-1">光速云 · 极速专线版</p>
+            <p class="text-muted text-[11px] mt-1">¥25/月 (168GB) · IEPL专线 · 原生免风控</p>
+            <a href="/brands/guangsu" class="text-primary text-[11px] underline block mt-2">查看实测报告 &rarr;</a>
+          </div>
+          <div class="border-border border p-3 bg-background">
+            <span class="text-faint text-[10px]">差旅备用 / 永不过期</span>
+            <p class="font-bold text-foreground text-sm mt-1">光速云 · 致敬斯诺克</p>
+            <p class="text-muted text-[11px] mt-1">¥147 一次性买断 (247GB) · 终身不限时</p>
+            <a href="/brands/guangsu#plans" class="text-primary text-[11px] underline block mt-2">直达买断方案 &rarr;</a>
+          </div>
+          <div class="border-border border p-3 bg-background">
+            <span class="text-faint text-[10px]">极致性价比 / 预算无忧</span>
+            <p class="font-bold text-foreground text-sm mt-1">闪电鼠 / 大佬云</p>
+            <p class="text-muted text-[11px] mt-1">低至 ¥5.6/月起 · 50G基础流量 · 轻量科研</p>
+            <a href="/brands/shandianshu" class="text-primary text-[11px] underline block mt-2">查看入门详情 &rarr;</a>
+          </div>
+          <div class="border-border border p-3 bg-background">
+            <span class="text-faint text-[10px]">跨境电商 / 团队直播</span>
+            <p class="font-bold text-foreground text-sm mt-1">企业独享固定原生 IP</p>
+            <p class="text-muted text-[11px] mt-1">¥680/月 · 独享专属出口 · 防关联风控</p>
+            <a href="/brands/guangsu#plans" class="text-primary text-[11px] underline block mt-2">查看企业配置 &rarr;</a>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="rail border-border border-t pt-16">
-      <Section label="Plans" id="plans">
-        <h2 class="sr-only">Plans</h2>
-        {plans.map(({ data }) => (
-          <article class="border-border border-b py-9 first:pt-0">
-            <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2">
-              <h3 class="text-xl font-medium tracking-[-0.028em]">{data.name}</h3>
-              {data.featured && (
-                <p class="text-primary font-mono text-[11px]">{ui.pricing.featured}</p>
-              )}
-              {/* $0 rather than the word: the plan is already called Free, and the
-                    three prices only line up when all three are numbers. */}
-              <p class="ml-auto text-3xl font-medium tracking-[-0.03em] tabular-nums">
-                {money(data.priceMonthly, data.currency)}
-                <span class="text-faint text-sm font-normal tracking-normal">
-                  {ui.pricing.month}
-                </span>
-              </p>
-            </div>
-            <p class="text-muted mt-2">{data.tagline}</p>
-            {data.priceMonthly > 0 && (
-              <p class="text-faint mt-1 font-mono text-[11px]">
-                {ui.pricing.twelveMonths(money(data.priceMonthly * 12, data.currency))}
-              </p>
-            )}
-            <ul class="mt-6 grid gap-2 text-sm">
-              {data.features.map((feature) => (
-                <li class="text-muted grid grid-cols-[1.25rem_minmax(0,1fr)]">
-                  <span class="text-faint" aria-hidden="true">
-                    —
-                  </span>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <p class="mt-7">
-              <a class:list={['btn', !data.featured && 'btn--quiet']} href={data.cta.href}>
-                {data.cta.label}
-              </a>
-            </p>
-          </article>
-        ))}
+    <!-- Main Marginal Index Sections -->
+    <div class="rail border-border border-t pt-14">
+
+      <!-- Section 1: Tier Overview Cards -->
+      <Section label="梯队对比" id="tiers">
+        <h2 class="text-2xl font-medium tracking-tight">4 档主流预算梯度深度横向横评</h2>
+        <p class="text-muted mt-2 text-sm leading-relaxed">
+          市场上的 42 家机场可以清晰地划分为四种截然不同的商业与技术形态。请根据您的财务预期与业务容忍度对号入座：
+        </p>
+
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {tiers.map((t) => (
+            <article
+              id={t.id}
+              class:list={[
+                'border-border border p-6 font-mono text-xs flex flex-col justify-between transition-all rounded-[2px]',
+                t.featured ? 'bg-surface/50 border-primary ring-1 ring-primary/30' : 'bg-background hover:border-foreground/30',
+              ]}
+            >
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-lg font-bold text-foreground">{t.name}</h3>
+                    {t.featured && (
+                      <span class="bg-primary text-on-primary px-2 py-0.5 text-[10px] font-semibold rounded-[2px]">
+                        综合首推
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div class="mt-3 flex items-baseline gap-1">
+                  <span class="text-3xl font-bold text-foreground">{t.price}</span>
+                  <span class="text-faint text-xs">{t.unit}</span>
+                </div>
+                <p class="text-muted mt-2 text-xs leading-relaxed">{t.tagline}</p>
+
+                <div class="border-border border-t mt-4 pt-3">
+                  <span class="text-faint text-[11px]">适用画像:</span>
+                  <p class="text-foreground text-xs mt-0.5 leading-relaxed">{t.targetAudience}</p>
+                </div>
+
+                <div class="border-border border-t mt-3 pt-3">
+                  <span class="text-faint text-[11px]">代表收录品牌:</span>
+                  <p class="text-foreground font-semibold mt-0.5">{t.brands.join('、')}</p>
+                </div>
+
+                <!-- Feature Highlights -->
+                <div class="border-border border-t mt-4 pt-3">
+                  <span class="text-faint text-[11px]">核心技术优势:</span>
+                  <ul class="mt-2 space-y-1.5 text-muted text-xs">
+                    {t.features.map((f) => (
+                      <li class="flex items-start gap-2 leading-relaxed">
+                        <span class="text-primary font-bold shrink-0">✓</span>
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <!-- Limitations -->
+                <div class="border-border border-t mt-3 pt-3">
+                  <span class="text-danger font-semibold text-[11px]">客观局限与考量:</span>
+                  <ul class="mt-1.5 space-y-1 text-faint text-[11px]">
+                    {t.limitations.map((lim) => (
+                      <li class="flex items-start gap-1.5 leading-relaxed">
+                        <span class="text-danger shrink-0">⚠</span>
+                        <span>{lim}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div class="mt-6 pt-4 border-border border-t">
+                <a
+                  href={t.cta.href}
+                  class:list={['btn w-full text-center text-xs py-2', t.featured ? '' : 'btn--quiet']}
+                >
+                  {t.cta.label} &rarr;
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
       </Section>
 
-      <Section label="Billing" id="billing" class="mt-20">
-        <h2 class="text-2xl font-medium tracking-[-0.028em]">
-          The questions that arrive with a purchase order.
-        </h2>
-        <div class="border-border mt-6 border-t">
-          {questions.map((item) => (
-            <details class="border-border border-b">
-              <summary class="marker:text-faint cursor-pointer py-3.5 text-sm font-medium">
-                {item.q}
+      <!-- Section 2: Master Comparison Table (Module 2: Core Evidence Table) -->
+      <Section label="参数大表" id="matrix" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">重点品牌价格参数与技术特征对照总表</h2>
+        <p class="text-muted mt-2 text-sm leading-relaxed">
+          横向比对真实月付价、年付折算单价、一次性买断成本、协议类型与实测状态。拒绝模糊宣传，所有数据均有据可查：
+        </p>
+
+        <div class="mt-6 table-scroll border-border border font-mono text-xs">
+          <table class="w-full text-left border-collapse min-w-[760px]">
+            <thead>
+              <tr class="bg-surface border-border border-b text-faint text-[11px]">
+                <th class="py-3 px-3 font-normal">排名/品牌</th>
+                <th class="py-3 px-3 font-normal">月付实价</th>
+                <th class="py-3 px-3 font-normal">年付折算价</th>
+                <th class="py-3 px-3 font-normal">买断/不限时</th>
+                <th class="py-3 px-3 font-normal">线路架构</th>
+                <th class="py-3 px-3 font-normal">设备并发</th>
+                <th class="py-3 px-3 font-normal">AI与流媒体解锁</th>
+                <th class="py-3 px-3 font-normal">优惠码</th>
+                <th class="py-3 px-3 font-normal text-right">评测报告</th>
+              </tr>
+            </thead>
+            <tbody>
+              {priceMatrixData.map((row) => (
+                <tr class="border-border border-b last:border-b-0 hover:bg-surface/50 transition-colors">
+                  <td class="py-3.5 px-3">
+                    <div class="flex items-center gap-1.5 font-medium text-foreground">
+                      <span class="text-primary font-bold">#{row.rank}</span>
+                      <a href={`/brands/${row.slug}`} class="hover:text-primary no-underline font-semibold">
+                        {row.name}
+                      </a>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3 font-bold text-foreground">{row.monthlyPrice}</td>
+                  <td class="py-3.5 px-3 text-muted">{row.yearlyAvgPrice}</td>
+                  <td class="py-3.5 px-3 text-faint">{row.paygPrice}</td>
+                  <td class="py-3.5 px-3 text-muted">{row.lineType}</td>
+                  <td class="py-3.5 px-3 text-faint">{row.deviceLimit}</td>
+                  <td class="py-3.5 px-3">
+                    <span class={row.aiUnlock.includes('原生') ? 'text-primary font-semibold' : 'text-muted'}>
+                      {row.aiUnlock}
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-3">
+                    {row.coupon !== '无' ? (
+                      <code class="bg-primary/10 text-primary border border-primary/20 px-1 py-0.5 rounded-[2px] text-[10px] font-bold">
+                        {row.coupon}
+                      </code>
+                    ) : (
+                      <span class="text-faint">—</span>
+                    )}
+                  </td>
+                  <td class="py-3.5 px-3 text-right">
+                    <a href={`/brands/${row.slug}`} class="text-xs text-primary underline">
+                      查看实测 &rarr;
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="text-faint font-mono text-[11px] mt-2.5">
+          * 数据核查日期：2026 年 10 月下旬。所有套餐价格均来自各品牌官方控制台公开账单，且经过第三方测速机器人抽样验证。更多 42 家参数请查阅
+          <a href="/brands" class="text-primary underline">42 家机场品牌库完整大表</a>。
+        </p>
+      </Section>
+
+      <!-- Section 3: Cost & Value Breakdown (Module 3: H2/H3 Depth Analysis) -->
+      <Section label="成本拆解" id="cost-analysis" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">深入算账：5 元档与 25 元档背后的真实技术成本</h2>
+        <div class="prose mt-4 text-muted text-sm leading-relaxed">
+          <p>
+            很多用户常常困惑：为什么有的机场每个月只需 5.6 元甚至还给几百吉字节流量，而以光速云为代表的高端机场月费要二十多元？这十几块钱的差价到底差在哪里？
+          </p>
+          <p>
+            答案完全隐藏在物理基础设施的采购账单与超卖比（Over-subscription Ratio）中。
+          </p>
+
+          <h3>1. 跨境网络物理出口的真实采购成本</h3>
+          <p>
+            跨境网络通信必须依赖物理光缆。普通的廉价机场采用公网直连或者廉价的公网隧道，它们租用的是海外大型廉价机房的普通公网 VPS。这种带宽的批发成本通常低至每 Gbps 每月数百元人民币。
+            但到了晚上八点半到十一点的晚高峰，由于数以万计的用户同时涌入公网海缆出口，运营商的国际出入口局会触发强制性的 QoS 丢弃策略，丢弃优先级低的数据包，直接导致延迟飙升与严重丢包。
+          </p>
+          <p>
+            而真正的 IEPL（国际以太网私有专线）是向中国电信、中国联通等持牌运营商直接租用的点对点陆缆内网。专线数据全程在运营商的独立二层物理网络中流转，根本不经过公网国际网关，因此晚高峰丢包率为零。
+            一条经过 SLA 服务品质保证的企业级千兆 IEPL 跨境专线，每月裸带宽成本高达上万元。商家必须在保障用户体验的前提下平摊成本，这就是旗舰专线价格在二十元以上的物理铁律。
+            关于底层光缆拓扑与物理丢包机制的万字拆解，可以查阅我们的专栏文章
+            <a href="/blog/iepl-vs-iplc-vs-transit-guide/">《IEPL 专线、IPLC 专线与普通 BGP 中转：晚高峰延迟与底层拓扑深度剖析》</a>。
+          </p>
+
+          <h3>2. 超卖比对代码编写与 AI 工具的毁灭性影响</h3>
+          <p>
+            5 元档机场为了覆盖服务器成本，通常会将一条 1Gbps 的公网通道同时分配给上千名用户，超卖比高达几十倍。平时大家都不在线时可能感觉尚可，一旦进入晚高峰，网络拥堵就会引发剧烈的抖动（Jitter）。
+          </p>
+          <p>
+            在我们的
+            <a href="/blog/github-copilot-speedup-guide/">《GitHub 与 GitHub Copilot 访问加速全攻略》</a>
+            中曾详细论证过：敲代码时的实时自动补全对网络延迟极其敏感。当你敲击键盘停顿 300 毫秒等待建议时，如果底层线路发生丢包重传，提示就会卡顿一秒以上才出来，彻底打乱思考节奏。
+            而在使用 ChatGPT 与 Claude 时，频繁的 TCP 重连会导致 TLS 会话不断撕毁与重新协商，极易触发官方防刷机制并导致封号，具体机理可参考
+            <a href="/blog/chatgpt-claude-proxy-guide/">《2026 开发者 AI 专线实测与防封策略》</a>。
+          </p>
+
+          <h3>3. 永久不限时套餐的经济学模型</h3>
+          <p>
+            很多用户习惯了按月缴费，却忽略了未用完流量被系统清零的隐形财务损失。
+            比如用户购买了每月 15 元含 100GB 的月付套餐，由于平时工作繁忙，当月实际只消耗了 15GB，剩余的 85GB 随着周期重置彻底蒸发，实际折算的单位有效流量成本高达 1 元每 GB。
+          </p>
+          <p>
+            以
+            <a href="/brands/guangsu">光速云</a>
+            的 147 元 247GB 永久套餐为例：单次付费终身买断，每 GB 的绝对持有成本仅为约 0.59 元，并且永久不会清零。
+            对于常年出差、多设备备用或轻度科研学者来说，这种方案的总拥有成本（TCO）远低于连续续费几年的月付套餐。
+          </p>
+        </div>
+      </Section>
+
+      <!-- Section 4: Billing Traps & Multiplier Hazards (Module 4: Technical Principles) -->
+      <Section label="避坑法则" id="traps" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">避开隐形扣费与虚假宣传的四大铁律</h2>
+        <div class="prose mt-4 text-muted text-sm leading-relaxed">
+          <p>
+            在选购机场套餐时，除了看表面上的价格和流量数字，还必须警惕以下常见陷阱：
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose font-mono text-xs mt-6">
+            <div class="border-border border p-4 bg-background">
+              <span class="text-danger font-semibold flex items-center gap-1.5">
+                <span>🚫</span> 陷阱一：高倍率节点隐形吃流量
+              </span>
+              <p class="text-muted mt-2 leading-relaxed">
+                某些服务商宣传 300GB 大套餐只需十几元，但进控制台才发现其唯一的低延迟专线节点倍率高达 3.0x 或 5.0x。
+                这意味着你实际下载 10GB 镜像文件，后台会扣除 30GB 到 50GB 额度，标称流量瞬间缩水几倍。选购时务必核实主力节点是否为标准的 1.0x 真实倍率。
+              </p>
+            </div>
+
+            <div class="border-border border p-4 bg-background">
+              <span class="text-danger font-semibold flex items-center gap-1.5">
+                <span>🚫</span> 陷阱二：年付超低价诱饵与跑路黑产
+              </span>
+              <p class="text-muted mt-2 leading-relaxed">
+                新开张仅几个月的不知名小机场，常常推出 50 元包年甚至 99 元三年的超低价套餐以聚拢现金流。
+                由于这种低价根本无法覆盖长期的光缆内网租金，一旦后续新用户增长停滞，经营者极易卷款失联。坚持老牌运营与先买一个月是防止资金损失的第一法则。
+              </p>
+            </div>
+
+            <div class="border-border border p-4 bg-background">
+              <span class="text-danger font-semibold flex items-center gap-1.5">
+                <span>🚫</span> 陷阱三：绑定专用客户端拒绝通用订阅
+              </span>
+              <p class="text-muted mt-2 leading-relaxed">
+                部分不良平台拒绝提供通用的 Clash、Shadowrocket 或 Sing-box 订阅链接，强迫用户必须安装其二次打包的闭源客户端。
+                此类客户端往往内置弹窗广告、篡改主页甚至包含安全隐患。正规服务商必然支持标准化开源客户端订阅导入。
+              </p>
+            </div>
+
+            <div class="border-border border p-4 bg-background">
+              <span class="text-danger font-semibold flex items-center gap-1.5">
+                <span>🚫</span> 陷阱四：虚假专线与公网直连冒充
+              </span>
+              <p class="text-muted mt-2 leading-relaxed">
+                商家在宣传页大肆宣称自己拥有千兆 IPLC 专线，但在晚高峰使用 MTR 工具测试时，丢包率瞬间飙升至 20% 以上。
+                真正的专线晚高峰丢包率必须稳定在 0%。读者可根据我们的
+                <a href="/blog/iepl-vs-iplc-vs-transit-guide/" class="text-primary underline">MTR 鉴别真伪专线教程</a>
+                自行在本地电脑执行发包命令验证。
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 5: Decision Flowchart (Module 5: Decision Paths) -->
+      <Section label="选型流程" id="flowchart" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">四步科学选型工作流：找到您的最佳方案</h2>
+        <p class="text-muted mt-2 text-sm">
+          按照以下四个先后顺序逐级排查，即可快速锁定最适合您的具体品牌与套餐：
+        </p>
+
+        <div class="border-border border bg-surface/30 p-5 mt-6 font-mono text-xs space-y-4">
+          <div class="border-border border-b pb-3.5">
+            <span class="text-primary font-bold">第一步：评估核心应用场景的敏感程度</span>
+            <p class="text-muted mt-1 leading-relaxed">
+              - 是否需要每天频繁调用 ChatGPT、Claude API、GitHub Copilot 或使用固定账号管理出海店铺？<br/>
+              &rarr; <strong>是</strong>：直接进入【顶级旗舰 IEPL 专线档】，锁定
+              <a href="/brands/guangsu" class="text-primary underline">光速云 (25元/月)</a>
+              或
+              <a href="/brands/muguang" class="text-primary underline">暮光加速</a>，杜绝因公网 IP 波动触发封号。<br/>
+              &rarr; <strong>否（仅查学术论文、普通外网阅览）</strong>：进入第二步。
+            </p>
+          </div>
+
+          <div class="border-border border-b pb-3.5">
+            <span class="text-primary font-bold">第二步：测算实际月度下行流量消耗</span>
+            <p class="text-muted mt-1 leading-relaxed">
+              - 网页检索与文档查阅：月消耗通常在 15GB 到 40GB 之间。<br/>
+              - 每周观看数小时 YouTube 1080P/4K 或克隆中型开源仓库：月消耗约在 80GB 到 150GB 之间。<br/>
+              - 频繁拉取大型 Docker 容器镜像、本地运行大模型权重同步：月消耗通常超过 250GB。<br/>
+              &rarr; 根据用量在 42 家大表中匹配对应的额度，避免为用不完的冗余流量持续买单。
+            </p>
+          </div>
+
+          <div class="border-border border-b pb-3.5">
+            <span class="text-primary font-bold">第三步：评估使用频率的连续性</span>
+            <p class="text-muted mt-1 leading-relaxed">
+              - 每天常态化固定使用：选择正规月付或按季度订阅，享有定期的流量配额刷新。<br/>
+              - 经常出差、断断续续使用、或作为主力宽带故障时的备用跳板：<br/>
+              &rarr; 坚决选择
+              <a href="/brands/guangsu#plans" class="text-primary underline">光速云 147 元不过期买断包</a>，零月租且终身可用。
+            </p>
+          </div>
+
+          <div>
+            <span class="text-primary font-bold">第四步：落实首月试用与客户端配置验证</span>
+            <p class="text-muted mt-1 leading-relaxed">
+              - 确定心仪品牌后，先以最低周期（一个月）购买体验，配合优惠码（如光速云优惠码 <code class="bg-primary/10 px-1 font-bold">AMM</code>）抵扣费用。<br/>
+              - 参考我们的
+              <a href="/clients" class="text-primary underline">《全平台客户端安装与配置教程》</a>
+              将订阅导入至 Clash Verge Rev 或小火箭中，开启 TUN 虚拟网卡模式，在晚高峰 21 点实测连通稳定性。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 6: User Personas Matching -->
+      <Section label="职业画像" id="personas" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">四类典型开发者职业画像对号入座</h2>
+
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
+          <div class="border-border border p-4 bg-background flex flex-col justify-between">
+            <div>
+              <span class="text-primary font-semibold">👨‍💻 画像 A：全栈研发 / AI 算法工程师</span>
+              <p class="text-muted mt-2 leading-relaxed">
+                <strong>痛点：</strong>日常高度依赖 GitHub、Docker Hub、HuggingFace、Claude Code 与 ChatGPT。对网络 RTT 延迟极度敏感，不能接受 Copilot 语法补全卡顿，极度害怕账号被风控封禁。<br/>
+                <strong>推荐方案：</strong>光速云极速版（¥25/月，168GB）或暮光加速标准版。开启 Clash Verge TUN 模式接管终端命令行。
+              </p>
+            </div>
+            <div class="mt-4 pt-2 border-border border-t">
+              <a href="/brands/guangsu" class="text-primary underline">查看光速云技术实测 &rarr;</a>
+            </div>
+          </div>
+
+          <div class="border-border border p-4 bg-background flex flex-col justify-between">
+            <div>
+              <span class="text-foreground font-semibold">🎓 画像 B：在校学生 / 学术科研人员</span>
+              <p class="text-muted mt-2 leading-relaxed">
+                <strong>痛点：</strong>每月主要检索 Google Scholar、IEEE、Nature 文献，下载学术 PDF。预算有限，希望每月支出控制在一顿快餐钱以内。<br/>
+                <strong>推荐方案：</strong>闪电鼠（¥5.6/月起）、飞猫云学生版（¥7/月）或微风网络轻量包。以极低试错门槛满足日常学术刚需。
+              </p>
+            </div>
+            <div class="mt-4 pt-2 border-border border-t">
+              <a href="/brands/shandianshu" class="text-primary underline">查看闪电鼠入门套餐 &rarr;</a>
+            </div>
+          </div>
+
+          <div class="border-border border p-4 bg-background flex flex-col justify-between">
+            <div>
+              <span class="text-foreground font-semibold">✈️ 画像 C：频繁差旅 / 应急备用极客</span>
+              <p class="text-muted mt-2 leading-relaxed">
+                <strong>痛点：</strong>在国内或海外频繁穿梭，平时主力公司网络很通畅，但在机场、高铁、咖啡厅遇到突发排障时，急需一条随时能连上的高质量网络通道，不想为每月不用的套餐持续交月租。<br/>
+                <strong>推荐方案：</strong>光速云致敬斯诺克 147 元 247GB 永久套餐。一次买断终身备用。
+              </p>
+            </div>
+            <div class="mt-4 pt-2 border-border border-t">
+              <a href="/brands/guangsu#plans" class="text-primary underline">查看光速云买断方案 &rarr;</a>
+            </div>
+          </div>
+
+          <div class="border-border border p-4 bg-background flex flex-col justify-between">
+            <div>
+              <span class="text-primary font-semibold">🌐 画像 D：跨境电商团队 / TikTok 出海机构</span>
+              <p class="text-muted mt-2 leading-relaxed">
+                <strong>痛点：</strong>需要长期稳定管理海外亚马逊店铺、Stripe 账户以及开展 TikTok 高清出海直播。共享 IP 极易引发连带封店封号灾难。<br/>
+                <strong>推荐方案：</strong>光速云企业独享定制版（¥680/月，500GB 独享原生 IP）。具备独立专享出口带宽与防关联保障。
+              </p>
+            </div>
+            <div class="mt-4 pt-2 border-border border-t">
+              <a href="/brands/guangsu#plans" class="text-primary underline">联系光速云企业客服 &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 7: Deep FAQ (Module 6: 8 High-Value Questions) -->
+      <Section label="常见问答" id="faq" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">选型与价格常见疑问深度解答 (FAQ)</h2>
+        <div class="border-border mt-6 border-t font-mono text-xs">
+          {faqs.map((faq) => (
+            <details class="disclosure border-border border-b">
+              <summary class="py-3.5 text-sm font-medium text-foreground cursor-pointer">
+                {faq.q}
               </summary>
-              <p class="text-muted pb-4 text-sm">{item.a}</p>
+              <p class="text-muted pb-4 leading-relaxed leading-normal">{faq.a}</p>
             </details>
           ))}
         </div>
       </Section>
-    </div>
 
-    <div class="shell-body border-border mt-24 border-t pt-10">
-      <h2 class="text-xl font-medium tracking-[-0.028em]">Start on the free build.</h2>
-      <p class="text-muted mt-3">
-        It is the same program with a ceiling. If your archive is under 20,000 files you may never
-        need to come back to this page.
-      </p>
-      <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
-        <a class="btn" href="/#how">
-          Download 1.4
-        </a>
-        <a class="text-sm underline underline-offset-[0.15em]" href="/blog">
-          Read how it is built
-        </a>
-      </div>
+      <!-- Section 8: Conversion & Internal Hub (Module 7: Action Cards) -->
+      <Section label="快速行动" id="action" class="mt-24">
+        <h2 class="text-2xl font-medium tracking-tight">立即开启极速网络选型</h2>
+        <p class="text-muted mt-2 text-sm font-mono">
+          数据驱动决策，透明公开检验。以下为全站核心入口与高优先级转化通道：
+        </p>
+
+        <div class="border-border border bg-surface/50 p-6 mt-6 rounded-[2px] flex flex-wrap items-center justify-between gap-4 font-mono text-xs">
+          <div>
+            <span class="text-faint text-[11px]">首推标杆品牌</span>
+            <h3 class="text-xl font-bold text-foreground mt-0.5">光速云：IEPL 专线综合第一名</h3>
+            <p class="text-muted text-xs mt-1">
+              年付低至 ¥8/月 · 147 元不过期买断版 · 专属新人优惠码 <code class="bg-primary/10 px-1 py-0.5 font-bold text-primary">AMM</code>
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <a
+              href={guangsu.affLink}
+              target="_blank"
+              rel="nofollow sponsored noopener"
+              class="btn py-2.5 px-6 text-sm"
+            >
+              直达光速云官网注册 &rarr;
+            </a>
+            <a href="/brands/guangsu" class="text-xs font-mono underline hover:text-primary">
+              查看光速云完整测评
+            </a>
+          </div>
+        </div>
+
+        <div class="mt-8 flex flex-wrap items-center justify-between gap-4 pt-4 border-border border-t font-mono text-xs">
+          <a href="/brands" class="text-primary underline hover:text-foreground">
+            &larr; 查看 42 家主流机场品牌完整总表与即时筛选
+          </a>
+          <a href="/clients" class="text-primary underline hover:text-foreground">
+            阅读全平台客户端下载与图文配置教程 &rarr;
+          </a>
+        </div>
+      </Section>
     </div>
   </div>
 </Base>

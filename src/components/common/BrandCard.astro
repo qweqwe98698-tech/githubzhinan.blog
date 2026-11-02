@@ -1,0 +1,117 @@
+---
+import type { BrandEntity } from '../../data/brands';
+
+interface Props {
+  brand: BrandEntity;
+  featured?: boolean;
+}
+
+const { brand, featured = false } = Astro.props;
+---
+
+<article
+  class:list={[
+    'border-border border p-5 transition-all',
+    featured ? 'bg-surface/50 border-primary/50 ring-1 ring-primary/20' : 'bg-background hover:border-foreground/30',
+  ]}
+>
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <div class="flex items-center gap-2.5">
+      <span
+        class:list={[
+          'font-mono text-xs font-semibold px-2 py-0.5 rounded-[2px]',
+          brand.rank === 1
+            ? 'bg-primary text-on-primary'
+            : brand.rank <= 3
+              ? 'bg-foreground text-background'
+              : 'bg-surface text-faint border border-border',
+        ]}
+      >
+        TOP {brand.rank}
+      </span>
+      {brand.logoImage && (
+        <img
+          src={brand.logoImage}
+          alt={`${brand.name} 图标`}
+          class="w-6 h-6 object-contain rounded-[2px] border border-border bg-surface p-0.5"
+          loading="lazy"
+        />
+      )}
+      <h3 class="text-xl font-medium tracking-tight">
+        <a href={`/brands/${brand.id}`} class="hover:text-primary no-underline">
+          {brand.name}
+        </a>
+      </h3>
+      {brand.speedtestImage && (
+        <span class="text-primary border-primary/40 rounded-[2px] border px-1.5 py-0.5 font-mono text-[10px]">
+          有实测图
+        </span>
+      )}
+    </div>
+
+    <div class="text-right">
+      <span class="text-xs text-faint">起步价格</span>
+      <p class="font-mono text-base font-semibold text-foreground">{brand.startingPrice}</p>
+    </div>
+  </div>
+
+  <p class="text-muted mt-2.5 text-sm line-clamp-2">
+    {brand.tagline}
+  </p>
+
+  <!-- Tags -->
+  <div class="mt-3.5 flex flex-wrap gap-1.5 font-mono text-[11px]">
+    {brand.lineTypes.map((line) => (
+      <span class="bg-surface text-muted border-border border px-2 py-0.5">
+        {line}
+      </span>
+    ))}
+    {brand.protocols.map((proto) => (
+      <span class="bg-surface text-faint border-border border px-2 py-0.5">
+        {proto}
+      </span>
+    ))}
+    {brand.couponCode && (
+      <span class="text-primary bg-primary/10 border-primary/30 border px-2 py-0.5 font-medium">
+        券码: {brand.couponCode}
+      </span>
+    )}
+  </div>
+
+  <!-- Unlock Status Matrix -->
+  <div class="border-border text-faint mt-4 grid grid-cols-2 gap-2 border-t pt-3 font-mono text-[11px] sm:grid-cols-4">
+    <div>
+      <span class="text-muted">ChatGPT:</span>{' '}
+      <span class={brand.unlockInfo.chatgpt.includes('支持') ? 'text-primary font-medium' : ''}>
+        {brand.unlockInfo.chatgpt}
+      </span>
+    </div>
+    <div>
+      <span class="text-muted">Netflix:</span>{' '}
+      <span class="text-foreground">{brand.unlockInfo.netflix}</span>
+    </div>
+    <div>
+      <span class="text-muted">YouTube:</span>{' '}
+      <span class="text-foreground">{brand.unlockInfo.youtube}</span>
+    </div>
+    <div>
+      <span class="text-muted">数据状态:</span>{' '}
+      <span class="text-faint">{brand.dataStatus === 'measured' ? '实测验证' : '厂商数据'}</span>
+    </div>
+  </div>
+
+  <!-- CTAs -->
+  <div class="border-border mt-4.5 flex flex-wrap items-center justify-between gap-3 border-t pt-3.5">
+    <a href={`/brands/${brand.id}`} class="text-xs font-mono underline hover:text-primary">
+      查看深度评测与实测数据 &rarr;
+    </a>
+    <a
+      href={brand.affLink}
+      target="_blank"
+      rel="nofollow sponsored noopener"
+      class:list={['btn text-xs py-1.5 px-3.5', featured ? '' : 'btn--quiet']}
+    >
+      直达官网注册
+    </a>
+  </div>
+</article>

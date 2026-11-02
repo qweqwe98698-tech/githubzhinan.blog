@@ -1,0 +1,93 @@
+---
+import type { LatencySample } from '../../data/brands';
+
+interface Props {
+  brandName: string;
+  samples: LatencySample[];
+  imageSrc?: string;
+  testDate?: string;
+}
+
+const { brandName, samples, imageSrc, testDate = '2026-10-19' } = Astro.props;
+---
+
+<div class="border-border border bg-surface/20 font-mono text-xs">
+  <!-- Header -->
+  <div class="border-border border-b px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 bg-surface/50">
+    <div class="flex items-center gap-2">
+      <span class="size-2 rounded-full bg-primary inline-block"></span>
+      <span class="font-medium text-foreground">{brandName} 节点测速实测报告</span>
+    </div>
+    <span class="text-faint text-[11px]">{testDate} 节点抽样实测</span>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-xs border-collapse">
+      <thead>
+        <tr class="border-border border-b text-faint text-[11px]">
+          <th class="py-2.5 px-4 font-normal">节点枢纽</th>
+          <th class="py-2.5 px-4 font-normal">平均延迟 (Ping)</th>
+          <th class="py-2.5 px-4 font-normal">下行带宽 (Download)</th>
+          <th class="py-2.5 px-4 font-normal">评级</th>
+        </tr>
+      </thead>
+      <tbody>
+        {samples.map((s) => {
+          const latNum = parseInt(s.latency, 10) || 100;
+          const isFast = latNum < 60;
+          const isMedium = latNum >= 60 && latNum < 150;
+          return (
+            <tr class="border-border border-b last:border-b-0 hover:bg-surface/40">
+              <td class="py-2.5 px-4 font-medium text-foreground">{s.region}</td>
+              <td class="py-2.5 px-4">
+                <span
+                  class:list={[
+                    'inline-block px-1.5 py-0.5 rounded-[2px] text-[11px]',
+                    isFast
+                      ? 'bg-primary/15 text-primary font-medium'
+                      : isMedium
+                        ? 'bg-foreground/10 text-foreground'
+                        : 'text-faint',
+                  ]}
+                >
+                  {s.latency}
+                </span>
+              </td>
+              <td class="py-2.5 px-4 font-semibold text-foreground">{s.download}</td>
+              <td class="py-2.5 px-4 text-faint text-[11px]">
+                {isFast ? '🟢 极速优质' : isMedium ? '🟡 稳定可用' : '⚪ 远距离节点'}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Image Evidence Preview if present -->
+  {imageSrc && (
+    <div class="border-border border-t p-4 bg-background">
+      <div class="text-[11px] text-faint mb-2 flex items-center justify-between">
+        <span>📷 第三方测试工具原始测速图证据 (MAI-TEST-BOT 实测抓取)</span>
+        <a href={imageSrc} target="_blank" rel="noopener" class="text-primary hover:underline">
+          查看原始全图 &rarr;
+        </a>
+      </div>
+      <div class="border-border border overflow-hidden rounded-[2px] bg-black/5 max-h-96 flex items-center justify-center">
+        <img
+          src={imageSrc}
+          alt={`${brandName} 节点测速实测报告全景图`}
+          loading="lazy"
+          class="w-full h-auto object-contain max-h-96"
+        />
+      </div>
+    </div>
+  )}
+
+  <!-- Footer summary -->
+  <div class="border-border border-t px-4 py-2.5 text-[11px] text-faint flex flex-wrap items-center justify-between gap-2 bg-surface/30">
+    <span>说明: 测速结果仅代表当次测试环境，实际体验受本地宽带、运营商路由及晚高峰波动影响。</span>
+    <span class="text-foreground font-medium">0% 丢包率标准测试</span>
+  </div>
+</div>

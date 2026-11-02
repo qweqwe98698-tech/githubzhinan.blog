@@ -1,9 +1,9 @@
 {
-  "name": "astro-theme-quarry",
+  "name": "githubzhinan-blog",
   "type": "module",
-  "version": "1.2.1",
+  "version": "1.0.0",
   "private": true,
-  "description": "Quarry - a free Astro theme for a developer tool: a marketing site set like a printed technical reference.",
+  "description": "GitHub 指南 - 专注优质开源项目深度剖析、现代软件工程实践与开发者效率工具的技术博客与知识库。",
   "engines": {
     "node": ">=22.12.0"
   },

@@ -1,55 +1,72 @@
 // src/config.ts — single entry point for site settings. Everything site-specific lives here; never hardcode in components.
 export const site = {
-  name: 'Quarry',
-  description: 'A marketing site for a developer tool, set like a printed technical reference.',
-  url: 'https://example.com',
-  locale: 'en', // BCP 47, e.g. 'en', 'ko'
-  author: 'Ada Example', // Fictional demo company. Replace with your own
+  name: 'GitHub 指南',
+  description: '面向开发者的全球网络加速与机场测速实测指南。深入评测 42 家主流机场，提供真实晚高峰测速、流媒体与 ChatGPT/Claude 解锁报告及客户端配置教程。',
+  url: 'https://githubzhinan.blog',
+  locale: 'zh-CN', // BCP 47
+  author: 'GitHub 指南团队',
   defaultOgImage: '/og-default.png',
 } as const;
 
 export const nav = {
   header: [
-    { label: 'How it works', href: '/#how' },
-    { label: 'Pricing', href: '/pricing' },
-    { label: 'Writing', href: '/blog' },
-    { label: 'About', href: '/about' },
+    { label: '42家品牌', href: '/brands' },
+    { label: '选型矩阵', href: '/pricing' },
+    { label: '客户端', href: '/clients' },
+    { label: '免费防坑', href: '/free' },
+    { label: '跑路预警', href: '/risk-warning' },
+    { label: '全景 FAQ', href: '/faq' },
+    { label: '深度测评', href: '/blog' },
   ],
-  // The header keeps one call to action to the right of the links above.
-  cta: { label: 'Start free', href: '/pricing' },
+  // Header call to action
+  cta: { label: '主推：光速云', href: '/brands/guangsu' },
   footer: [
     {
-      title: 'Product',
+      title: '机场评测与专栏',
       links: [
-        { label: 'Pricing', href: '/pricing' },
-        { label: 'Writing', href: '/blog' },
+        { label: '42家品牌完整大表', href: '/brands' },
+        { label: '主推第1名：光速云', href: '/brands/guangsu' },
+        { label: '暮光加速深度实测', href: '/brands/muguang' },
+        { label: '飞猫云新手实测', href: '/brands/feimao' },
+        { label: '微风网络实测', href: '/brands/weifeng' },
+        { label: '星岛梦实测', href: '/brands/xingdaomeng' },
       ],
     },
     {
-      title: 'Company',
+      title: '专题矩阵与知识库',
       links: [
-        { label: 'About', href: '/about' },
-        { label: 'Contact', href: '/contact' },
+        { label: '全平台客户端下载', href: '/clients' },
+        { label: '场景选型决策矩阵', href: '/pricing' },
+        { label: '免费节点防坑指南', href: '/free' },
+        { label: '跑路避坑预警情报库', href: '/risk-warning' },
+        { label: '网络工程全景 FAQ', href: '/faq' },
       ],
     },
     {
-      title: 'Legal',
+      title: '合规与政策说明',
       links: [
-        { label: 'Privacy', href: '/privacy' },
-        { label: 'Terms', href: '/terms' },
+        { label: '推广返利透明声明', href: '/terms' },
+        { label: '隐私政策与数据保护', href: '/privacy' },
+        { label: '联系与意见反馈', href: '/contact' },
+        { label: 'RSS 订阅', href: '/rss.xml' },
       ],
     },
   ],
   social: [
     { label: 'GitHub', href: 'https://github.com/', icon: 'lucide:github' },
-    // Icons are Lucide names (https://lucide.dev/icons)
   ],
 } as const;
 
 export const seo = {
-  titleTemplate: '%s · Quarry',
+  titleTemplate: '%s · GitHub 指南',
   twitterHandle: '',
   jsonLd: { type: 'Organization' as 'Person' | 'Organization', name: site.name },
+  verification: {
+    google: '',
+    bing: '',
+    baidu: '',
+    shenma: '',
+  },
 };
 
 export const blog = {
@@ -58,92 +75,75 @@ export const blog = {
 };
 
 export const contact = {
-  // Where /contact posts. Any service that accepts a plain form POST works:
-  // Formspree, Web3Forms, Basin. Replace the id; nothing else on the page changes.
-  formEndpoint: 'https://formspree.io/f/your-form-id',
-  email: 'hello@example.com', // shown beside the form for people who would rather write
-  responseTime: 'Two working days, usually the same one.',
+  formEndpoint: 'https://formspree.io/f/contact',
+  email: 'contact@githubzhinan.blog',
+  responseTime: '工作日 24 小时内回复',
 };
 
 export const features = {
   darkMode: true,
-  // The signature: numbered labels that stay in the left margin while a section
-  // scrolls. Off puts the label inline above the section heading instead.
   marginalIndex: true,
-  // A flag lands here when something reads it. One that controls nothing is worse
-  // than no flag, because a buyer turns it on and waits.
 };
 
 export const analytics = {
   provider: null as null | 'plausible' | 'ga4' | 'umami',
   id: '',
-  // Self-hosted Plausible or Umami: the origin serving the script, no trailing slash.
-  // Empty means the hosted service. GA4 ignores it.
   host: '',
 };
 
-// Every word the theme prints around your content, in one place: translate these and set
-// site.locale, which also sets dates and prices. Counts are functions, so plurals stay right:
-// posts: (count) => `${count} Artikel`. Strings marked HTML carry a link and are printed as
-// markup. The marketing pages (home, pricing, about) are written in their own files under
-// src/pages/.
-const n = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 export const ui = {
-  skipToContent: 'Skip to content',
-  mainNav: 'Main', // read out for the header links
-  rss: 'RSS',
-  theme: { system: 'System', light: 'Light', dark: 'Dark' },
-  updated: 'Updated',
-  lastUpdated: (date: string) => `Last updated ${date}`,
-  pagination: 'Pagination', // read out for the newer/older and previous/next links
+  skipToContent: '跳转到主要内容',
+  mainNav: '主导航',
+  rss: 'RSS 订阅',
+  theme: { system: '跟随系统', light: '浅色', dark: '深色' },
+  updated: '更新于',
+  lastUpdated: (date: string) => `最近更新于 ${date}`,
+  pagination: '分页导航',
   blog: {
-    title: 'Writing',
-    page: (page: number) => `Writing, page ${page}`,
-    description:
-      'Notes on how Quarry indexes, ranks and searches, and what we decided not to build.',
+    title: '深度测评专栏',
+    page: (page: number) => `测评文章 · 第 ${page} 页`,
+    description: '深入剖析主流机场节点测速、晚高峰延迟稳定性与 AI 工具解锁表现。',
     intro:
-      'Mostly about the parts of a search engine that are boring from the outside: what the index leaves out, why ranking changed, and where a network request would have been convenient and was not made.',
-    newer: 'Newer',
-    older: 'Older',
-    pageOf: (page: number, last: number) => `Page ${page} of ${last}`,
-    minutes: (count: number) => `${count} min`,
-    all: 'All writing',
-    tag: 'Tag',
-    tagDescription: (tag: string) => `Everything written about ${tag}.`,
-    posts: (count: number) => n(count, 'post', 'posts'),
-    feed: `${site.name} — Writing`, // the RSS feed's title
+      '基于真实测试环境与机器人在特定时间抓取的节点测速、丢包率与流媒体解锁实测报告。拒绝虚构推荐，坚持用数据说话。',
+    newer: '上一页',
+    older: '下一页',
+    pageOf: (page: number, last: number) => `第 ${page} 页 / 共 ${last} 页`,
+    minutes: (count: number) => `${count} 分钟阅读`,
+    all: '全部文章',
+    tag: '标签分类',
+    tagDescription: (tag: string) => `关于 ${tag} 的所有评测与教程。`,
+    posts: (count: number) => `共 ${count} 篇文章`,
+    feed: `${site.name} — 测评专栏`,
   },
   pricing: {
-    month: ' a month', // after a price, with its space
-    twelveMonths: (price: string) => `${price} over twelve months`,
-    featured: 'Most bought',
+    month: ' / 月',
+    twelveMonths: (price: string) => `年付折合 ${price}`,
+    featured: '重点推荐',
   },
   contact: {
-    title: 'Contact',
-    description: `Ask a question about ${site.name}, report a problem, or write about a licence.`,
-    heading: 'Write to us.',
+    title: '联系交流',
+    description: `与 ${site.name} 团队取得联系，反馈测速数据或咨询合作。`,
+    heading: '致信我们',
     intro:
-      'A licence question, a file that will not index, a feature you need. It reaches the two people who write the software, not a queue.',
-    name: 'Name',
-    email: 'Email',
-    message: 'Message',
-    // HTML
+      '如果您发现某个机场节点数据有变动、跑路预警，或有优质新线路推荐，欢迎随时向我们反馈。',
+    name: '您的称呼',
+    email: '电子邮箱',
+    message: '留言内容',
     messageHint:
-      'If it is a file that will not index, the output of <code class="font-mono text-[0.84375rem]">quarry status</code> tells us more than anything else you could paste.',
-    send: 'Send',
-    reply: 'Reply',
-    byMail: 'By mail',
-    bugs: 'Bugs',
-    // HTML. {issues} is the first link in nav.social.
+      '请说明您要反馈的机场名称、测试时间及具体问题，以便我们核实复测。',
+    send: '提交反馈',
+    reply: '回复时效',
+    byMail: '直接致信',
+    bugs: '社区互动',
     bugsText:
-      'The <a href="{issues}">issue tracker</a> is read before this form is, and other people can see the answer there.',
+      '亦可访问我们的 <a href="{issues}" target="_blank" rel="nofollow noopener noreferrer">GitHub 仓库</a> 提交 Issue 反馈最新节点情报。',
   },
   notFound: {
-    title: 'Page not found',
-    heading: 'Nothing is indexed here.',
-    text: 'The page you asked for is not on this site. It may have moved, or the link may have been written down wrong.',
-    blog: 'Writing',
-    pricing: 'Pricing',
-    home: 'Home',
+    title: '页面未找到',
+    heading: '404 · 页面未找到',
+    text: '您访问的页面不存在或已被移除，请检查输入的链接是否正确。',
+    blog: '测评专栏',
+    pricing: '选型矩阵',
+    home: '返回首页',
   },
 };

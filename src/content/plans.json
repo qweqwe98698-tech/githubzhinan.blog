@@ -1,54 +1,53 @@
 [
   {
-    "id": "free",
-    "name": "Free",
-    "tagline": "One machine, one index, no account.",
+    "id": "community",
+    "name": "社区版",
+    "tagline": "面向所有开发者的开放技术知识库与开源指引。",
     "priceMonthly": 0,
     "features": [
-      "Index up to 20,000 files",
-      "Full query syntax",
-      "Command line and app",
-      "Updates for the current major version"
+      "全量开源架构指南与深度解析",
+      "全站 RSS 订阅与文章离线阅读",
+      "标准 Markdown 与严谨排版",
+      "开源社区 Issue 互动与讨论"
     ],
     "cta": {
-      "label": "Download",
-      "href": "/#how"
+      "label": "开始阅读",
+      "href": "/blog"
     },
     "order": 1
   },
   {
     "id": "pro",
-    "name": "Pro",
-    "tagline": "The whole archive, and everything that reads it.",
+    "name": "专业专栏",
+    "tagline": "生产级高可用架构、系统重构与全套落地源码。",
     "priceMonthly": 6,
     "features": [
-      "Unlimited files and indexes",
-      "Loopback HTTP endpoint",
-      "Editor plugins for VS Code and Neovim",
-      "Saved searches with live counts",
-      "Two years of updates from purchase"
+      "独家工程实战专栏与系统设计复盘",
+      "配套企业级脚手架与模块源码",
+      "核心技术选型避坑与基准评测报告",
+      "优先技术答疑与专属交流群"
     ],
     "cta": {
-      "label": "Buy Pro",
-      "href": "https://example.com/checkout/quarry-pro"
+      "label": "了解方案",
+      "href": "/contact?plan=pro"
     },
     "featured": true,
     "order": 2
   },
   {
     "id": "team",
-    "name": "Team",
-    "tagline": "Per seat, with one set of rules for the whole team.",
-    "priceMonthly": 10,
+    "name": "企业内训与咨询",
+    "tagline": "为研发团队提供架构评审、效能治理与定制技术顾问。",
+    "priceMonthly": 29,
     "features": [
-      "Everything in Pro, per seat",
-      "Rule files checked into your repository",
-      "Licence keys you assign and reassign",
-      "Invoice billing from five seats"
+      "团队技术栈架构健康度评审与诊断",
+      "研发生命周期 CI/CD 与工作流效能治理",
+      "面向团队的定期专题技术工作坊",
+      "正规增值税发票与对公签约"
     ],
     "cta": {
-      "label": "Buy seats",
-      "href": "https://example.com/checkout/quarry-team"
+      "label": "联系顾问",
+      "href": "/contact?plan=team"
     },
     "order": 3
   }

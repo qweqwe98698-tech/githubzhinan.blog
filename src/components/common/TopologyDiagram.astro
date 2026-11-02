@@ -1,0 +1,73 @@
+---
+// Topology diagram rendered with rules and monospace typography
+interface Props {
+  brandName?: string;
+  lineType?: string;
+}
+
+const { brandName = '专线机场', lineType = 'IEPL 专线' } = Astro.props;
+---
+
+<figure class="border-border border bg-surface/30 p-4 sm:p-5 font-mono text-xs">
+  <div class="border-border text-faint border-b pb-3 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+    <span class="text-foreground font-semibold">🗺️ {brandName} {lineType} 网络拓扑与跨境流向架构</span>
+    <span class="text-primary font-mono">[全程内网专线传输]</span>
+  </div>
+
+  <div class="my-4 space-y-3">
+    <!-- Level 1 -->
+    <div class="border-border border bg-background p-3 rounded-[2px]">
+      <div class="flex items-center justify-between text-[11px] text-faint">
+        <span class="text-foreground font-medium">1. 本地客户端发起</span>
+        <span>Windows / macOS / iOS / Android</span>
+      </div>
+      <p class="text-muted mt-1 text-[11px]">
+        流量经由本地客户端（Clash Verge / Shadowrocket / Sing-box）通过 VLESS / Shadowsocks 加密封装，隐藏真实请求指纹。
+      </p>
+    </div>
+
+    <!-- Direction Arrow -->
+    <div class="text-center text-faint text-xs">
+      ▼ <span class="text-[10px]">加密隧道传输 (TLS / AEAD)</span>
+    </div>
+
+    <!-- Level 2 -->
+    <div class="border-border border bg-background p-3 rounded-[2px]">
+      <div class="flex items-center justify-between text-[11px] text-faint">
+        <span class="text-foreground font-medium">2. 国内入口网关 (BGP 多线智能调度)</span>
+        <span>上海 / 广州 / 深圳 BGP</span>
+      </div>
+      <p class="text-muted mt-1 text-[11px]">
+        多线接入自动就近调度，就近接入运营商骨干网，避免跨网互联延迟。
+      </p>
+    </div>
+
+    <!-- Direction Arrow (Dedicated Line) -->
+    <div class="text-center font-bold text-primary text-xs py-1">
+      ═════════ 跨境专线直连 ({lineType} · 不走公网互联网) ═════════
+    </div>
+
+    <!-- Level 3 -->
+    <div class="border-border border bg-background p-3 rounded-[2px]">
+      <div class="flex items-center justify-between text-[11px] text-faint">
+        <span class="text-foreground font-medium">3. 海外落地枢纽与业务分流</span>
+        <span>香港 / 日本 / 新加坡 / 美国</span>
+      </div>
+      <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+        <div class="border-border border border-dashed p-2">
+          <span class="text-primary font-medium">原生机房 IP 解锁区</span>
+          <p class="text-muted mt-0.5">ChatGPT、Claude、Netflix、Disney+ 原生识别，无降级与验证码骚扰</p>
+        </div>
+        <div class="border-border border border-dashed p-2">
+          <span class="text-foreground font-medium">海外常规公网出口</span>
+          <p class="text-muted mt-0.5">GitHub、Google、YouTube 4K、学术研究与外贸服务高速直连</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <figcaption class="border-border border-t pt-2.5 text-faint flex flex-wrap justify-between text-[11px]">
+    <span>架构优势: 跨境零公网跳转，抗封锁与抗 QoS 限速能力显著高于普通中转或直连</span>
+    <span class="text-foreground">已在生产节点验证</span>
+  </figcaption>
+</figure>

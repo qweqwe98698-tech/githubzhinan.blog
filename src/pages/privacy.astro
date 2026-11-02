@@ -1,52 +1,39 @@
 ---
-// Placeholder text of a real shape: a buyer replaces the words, not the structure.
 import Page from '../layouts/Page.astro';
 import { contact, site } from '../config';
 ---
 
 <Page
-  heading="Privacy"
-  lead={`What ${site.name} collects, which is very little, and what happens to it.`}
-  updated="10 June 2026"
-  title="Privacy"
-  description={`The data ${site.name} collects on this site and in the application, and how long it is kept.`}
+  heading="隐私政策"
+  lead={`${site.name} 高度重视访问者的隐私安全。本站遵循极简数据原则，不进行任何非必要的个人信息收集。`}
+  updated="2026 年 11 月 2 日"
+  title="隐私政策"
+  description={`${site.name} 的数据隐私保护原则与处理方式说明。`}
 >
   <p>
-    This is sample text for a theme. Replace it with a policy written for your own product and
-    checked by someone qualified to check it. The headings below are the ones most jurisdictions
-    expect to see.
+    本隐私政策阐明了您在访问和使用 {site.name}（包含域名下的所有页面与子服务）时，我们如何处理相关数据。我们坚信开发者的隐私应当得到最大程度的尊重。
   </p>
 
-  <h2>The application</h2>
-  <p>
-    The index and every file it describes stay on your machine. The application makes one outbound
-    request, a version check, no more than once every seven days. It sends the version you are
-    running and the operating system family, and it receives the number of the latest release.
-    Setting <code>updates.check = false</code> in the settings file stops it.
-  </p>
-
-  <h2>This website</h2>
+  <h2>静态网站与零侵入</h2>
   <ul>
     <li>
-      No analytics script is loaded unless one is configured, and none is configured here. If one is
-      turned on, that provider's own terms apply to whatever it collects.
+      <strong>无第三方追踪 Cookie</strong>：本站为静态网站架构，不植入任何跨站追踪、广告分析或第三方用户行为画像 Cookie。
     </li>
     <li>
-      No cookies are set. The light and dark preference is kept in local storage on your device.
+      <strong>本地偏好设置</strong>：您在页面上切换的浅色/深色主题模式仅保存在您本地浏览器的 localStorage 中，不会上传至任何服务器。
     </li>
-    <li>Web fonts are served from this domain, so no request reaches a font provider.</li>
+    <li>
+      <strong>独立静态资源分发</strong>：全站所有的 Web 字体与脚本文件均由本站服务器直接托管，不向外部字体 CDN 或境外不可控服务发起请求。
+    </li>
   </ul>
 
-  <h2>Purchases</h2>
+  <h2>留言与邮件联系</h2>
   <p>
-    Payment is handled by a third-party processor, which receives your billing details directly and
-    shares with us the email address, the country for tax purposes, and the amount. We keep those
-    for as long as tax law requires us to.
+    当您通过本站联系表单或直接致信 <a href={`mailto:${contact.email}`}>{contact.email}</a> 时，我们仅在回复您的咨询、技术讨论或业务合作所需的合理期限内保留您的姓名、邮箱地址与通信内容。我们绝不会将您的联系方式出售或转让给任何第三方。
   </p>
 
-  <h2>Asking us about your data</h2>
+  <h2>数据权利与咨询</h2>
   <p>
-    Write to <a href={`mailto:${contact.email}`}>{contact.email}</a>. We will answer within thirty
-    days, and sooner in practice.
+    如果您对本站的隐私处理方式有任何疑问，或需要请求查询、删除您曾主动提交的沟通记录，请随时通过 <a href={`mailto:${contact.email}`}>{contact.email}</a> 与我们联系，我们将在收到请求后 30 日内给予答复。
   </p>
 </Page>

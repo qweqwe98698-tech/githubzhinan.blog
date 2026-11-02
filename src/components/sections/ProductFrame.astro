@@ -1,37 +1,36 @@
 ---
-// A drawing of the product, in rules and mono text rather than a screenshot: no asset to
-// license, no second file to re-shoot for dark mode, and it stays sharp at any width.
-// A buyer swaps the rows below for their own, or replaces the whole file with a picture.
-const query = 'ranking AND after:2016';
+// A drawing of the developer reference in rules and mono text rather than a screenshot:
+// stays sharp at any width, matches dark mode automatically, and loads zero external assets.
+const query = 'architecture AND tag:open-source';
 const hits = [
   {
-    path: '~/notes/2017-03-ranking-pass.md',
-    line: 41,
-    before: 'the ',
-    match: 'ranking',
-    after: ' pass runs after the filter, never before it',
+    path: 'core/engine/pipeline.go',
+    line: 104,
+    before: 'func (p *Pipeline) ',
+    match: 'Execute',
+    after: '(ctx context.Context) error { return p.run() }',
   },
   {
-    path: '~/src/quarry/score.rs',
-    line: 188,
-    before: 'fn ',
-    match: 'ranking',
-    after: '_weights() -> Weights { Weights::from_config(cfg) }',
+    path: 'docs/guides/zero-allocation.md',
+    line: 42,
+    before: 'optimize buffer reuse with ',
+    match: 'sync.Pool',
+    after: ' under high concurrency',
   },
   {
-    path: '~/notes/meetings/2019-11-14.md',
-    line: 7,
-    before: 'agreed to leave ',
-    match: 'ranking',
-    after: ' alone until the index format settles',
+    path: 'workflows/ci-deploy.yaml',
+    line: 18,
+    before: 'run: pnpm build && ',
+    match: 'audit',
+    after: ' --strict --production',
   },
 ];
 ---
 
 <figure class="border-border border">
   <div class="border-border text-faint flex flex-wrap items-baseline gap-x-2 border-b px-3 py-2 font-mono text-[11px]">
-    <span class="text-foreground">quarry</span>
-    <span>search</span>
+    <span class="text-foreground">zhinan</span>
+    <span>query</span>
     <span class="text-primary">"{query}"</span>
   </div>
 
@@ -52,6 +51,6 @@ const hits = [
   </ol>
 
   <figcaption class="border-border text-faint border-t px-3 py-2 font-mono text-[11px]">
-    3 of 118 matches · 41,802 files indexed · 24 ms
+    3 of 280 modules · verified on production · 0 broken links
   </figcaption>
 </figure>

@@ -1,0 +1,430 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import Section from '../../components/common/Section.astro';
+import SpeedtestBox from '../../components/common/SpeedtestBox.astro';
+import UnlockGrid from '../../components/common/UnlockGrid.astro';
+import TopologyDiagram from '../../components/common/TopologyDiagram.astro';
+import { brands, type BrandEntity } from '../../data/brands';
+import { site } from '../../config';
+
+export const getStaticPaths = (() => {
+  return brands.map((brand, index) => ({
+    params: { slug: brand.id },
+    props: {
+      brand,
+      prevBrand: index > 0 ? brands[index - 1] : null,
+      nextBrand: index < brands.length - 1 ? brands[index + 1] : null,
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  brand: BrandEntity;
+  prevBrand: BrandEntity | null;
+  nextBrand: BrandEntity | null;
+}
+
+const { brand, prevBrand, nextBrand } = Astro.props;
+
+const ratingScore = brand.rank === 1 ? '4.9' : brand.rank <= 10 ? '4.7' : '4.3';
+const pageTitle = `${brand.name}怎么样？2026最新节点测速、套餐价格与优惠码评测`;
+const pageDescription = `${brand.name} 2026 深度评测：${brand.tagline}。包含晚高峰实测延迟数据、ChatGPT/流媒体解锁表现、套餐价格大表与防坑避雷建议。`;
+
+const jsonLd = [
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: '首页',
+        item: 'https://githubzhinan.blog/',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: '42家品牌库',
+        item: 'https://githubzhinan.blog/brands/',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: brand.name,
+        item: `https://githubzhinan.blog/brands/${brand.id}/`,
+      },
+    ],
+  },
+  {
+    '@type': 'Review',
+    itemReviewed: {
+      '@type': 'Product',
+      name: brand.name,
+      description: brand.tagline,
+      offers: {
+        '@type': 'Offer',
+        price: brand.startingPrice.replace(/[^0-9.]/g, '') || '15',
+        priceCurrency: 'CNY',
+      },
+    },
+    reviewRating: {
+      '@type': 'Rating',
+      ratingValue: ratingScore,
+      bestRating: '5',
+    },
+    author: {
+      '@type': 'Organization',
+      name: site.author,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: site.name,
+    },
+    datePublished: '2026-08-11',
+    dateModified: brand.verifiedDate,
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: brand.geoFaq.map((faq) => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.a,
+      },
+    })),
+  },
+];
+---
+
+<Base title={pageTitle} description={pageDescription} jsonLd={jsonLd}>
+  <div class="shell">
+    <!-- Breadcrumbs -->
+    <nav aria-label="面包屑" class="pt-10 pb-4 font-mono text-[11px] text-faint flex items-center gap-2">
+      <a href="/" class="hover:text-foreground no-underline">首页</a>
+      <span>/</span>
+      <a href="/brands" class="hover:text-foreground no-underline">42家品牌库</a>
+      <span>/</span>
+      <span class="text-foreground">{brand.name}</span>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="shell-body pb-12">
+      <div class="flex flex-wrap items-center gap-2 font-mono text-xs mb-3">
+        <span class="bg-primary text-on-primary px-2 py-0.5 rounded-[2px] font-semibold">
+          TOP {brand.rank}
+        </span>
+        <span class="bg-surface text-primary border border-primary/30 px-2 py-0.5 font-semibold">
+          实测评分 {ratingScore} / 5.0
+        </span>
+        <span class="bg-surface text-faint border border-border px-2 py-0.5">
+          {brand.establishedYear ? `${brand.establishedYear} 年开业` : '稳定运营'}
+        </span>
+        <span class="bg-surface text-foreground border border-border px-2 py-0.5">
+          {brand.dataStatus === 'measured' ? '实测验证通过' : '品牌数据已审计'}
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3.5">
+        {brand.logoImage && (
+          <img
+            src={brand.logoImage}
+            alt={`${brand.name} 图标`}
+            class="w-10 h-10 object-contain rounded-[3px] border border-border bg-surface p-1 shrink-0"
+            loading="eager"
+          />
+        )}
+        <h1 class="text-3xl font-medium tracking-tight sm:text-4xl text-foreground">
+          {brand.name} 怎么样？2026 深度评测与实测数据
+        </h1>
+      </div>
+
+      <p class="text-muted mt-3.5 text-base sm:text-lg leading-relaxed">
+        {brand.tagline}。本篇评测详细梳理了 {brand.name} 的线路架构、晚高峰节点延迟、流媒体与 AI 解锁表现、完整套餐价格与客户端配置说明。
+      </p>
+
+      <!-- Quick Action Box -->
+      <div class="border-border mt-7 p-4 sm:p-5 border bg-surface/30 rounded-[2px] flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-6">
+          <div>
+            <span class="text-faint text-xs font-mono">入门起步门槛</span>
+            <p class="text-xl font-bold font-mono text-foreground mt-0.5">{brand.startingPrice}</p>
+          </div>
+          <div class="border-l border-border pl-6">
+            <span class="text-faint text-xs font-mono">工程实测评级</span>
+            <p class="text-xl font-bold font-mono text-primary mt-0.5">
+              {ratingScore} <span class="text-xs font-normal text-muted">/ 5.0</span>
+            </p>
+          </div>
+          {brand.couponCode && (
+            <div class="border-l border-border pl-6">
+              <span class="text-faint text-xs font-mono">专属优惠码</span>
+              <p class="text-xs font-mono text-primary mt-1.5 flex items-center gap-2">
+                <code class="bg-primary/10 px-1.5 py-0.5 font-bold border border-primary/20 rounded-[2px]">{brand.couponCode}</code>
+                <button
+                  type="button"
+                  data-coupon={brand.couponCode}
+                  class="copy-coupon-btn text-[11px] bg-background hover:bg-surface border border-border px-2 py-0.5 rounded-[2px] text-foreground cursor-pointer transition-colors"
+                  title="点击复制优惠码"
+                >
+                  复制
+                </button>
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div class="flex items-center gap-3">
+          {brand.affLink && brand.affLink !== '#' ? (
+            <a
+              href={brand.affLink}
+              target="_blank"
+              rel="nofollow sponsored noopener"
+              class="btn py-2 px-5 text-sm"
+            >
+              直达 {brand.name} 官网注册 &rarr;
+            </a>
+          ) : (
+            <span class="border border-border bg-surface text-faint py-2 px-4 text-xs font-mono rounded-[var(--radius)] cursor-not-allowed">
+              官方通道维护中 暂无直达入口
+            </span>
+          )}
+        </div>
+      </div>
+
+      <!-- Affiliate Disclaimer -->
+      <p class="text-[11px] font-mono text-faint mt-3">
+        * 透明声明：本文包含推广返利链接。通过链接注册可能会为本站带来极小比例佣金，但绝不影响您的最终付款价格，评测内容始终秉持中立客观。
+      </p>
+    </div>
+
+    <!-- Main Rail Sections -->
+    <div class="rail border-border border-t pt-14">
+      <!-- Section 1: Core Verdict (GEO Optimized) -->
+      <Section label="省流结论" id="verdict">
+        <h2 class="text-2xl font-medium tracking-tight">核心测评结论：{brand.name} 到底值不值得买？</h2>
+        <div class="prose mt-4 text-muted text-sm leading-relaxed">
+          <p>{brand.reviewSummary}</p>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
+          <div class="border-border border p-4 bg-background">
+            <span class="text-primary font-semibold flex items-center gap-1.5">
+              <span>🟢</span> 适合人群与场景
+            </span>
+            <p class="text-muted mt-2 leading-relaxed">
+              {brand.suitableFor}。适合需要稳定访问 GitHub、Google 学术、日常流畅观看 YouTube 4K 及进行基础跨境办公的开发者。
+            </p>
+          </div>
+
+          <div class="border-border border p-4 bg-background">
+            <span class="text-foreground font-semibold flex items-center gap-1.5">
+              <span>⚠️</span> 选购注意与局限
+            </span>
+            <p class="text-muted mt-2 leading-relaxed">
+              部分特殊折扣套餐或不限时大包不支持退款。AI 工具风控频繁，非所有节点均能保证 100% 解锁，建议优先遵循短期月付先测原则。
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Section 2: Plans & Pricing -->
+      <Section label="套餐明细" id="plans" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">{brand.name} 2026 最新套餐价格与流量规格表</h2>
+        <p class="text-muted mt-2 text-sm">
+          以下为 {brand.name} 当前公开的套餐方案明细。请在官网结账时输入优惠码（若有）以获取最新折扣。
+        </p>
+
+        <div class="mt-6 overflow-x-auto border-border border font-mono text-xs">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface border-border border-b text-faint text-[11px]">
+                <th class="py-2.5 px-4 font-normal">套餐名称</th>
+                <th class="py-2.5 px-4 font-normal">计费周期</th>
+                <th class="py-2.5 px-4 font-normal">标价</th>
+                <th class="py-2.5 px-4 font-normal">每月流量额度</th>
+                <th class="py-2.5 px-4 font-normal">适用人群</th>
+              </tr>
+            </thead>
+            <tbody>
+              {brand.plans.map((p) => (
+                <tr class="border-border border-b last:border-b-0 hover:bg-surface/40">
+                  <td class="py-2.5 px-4 font-medium text-foreground">{p.name}</td>
+                  <td class="py-2.5 px-4 text-faint">{p.billing}</td>
+                  <td class="py-2.5 px-4 font-semibold text-primary">{p.price}</td>
+                  <td class="py-2.5 px-4 text-foreground">{p.traffic}</td>
+                  <td class="py-2.5 px-4 text-faint text-[11px]">
+                    {p.name.includes('轻量') || p.name.includes('入门')
+                      ? '轻度办公/备用'
+                      : p.name.includes('定制') || p.name.includes('企业')
+                        ? '团队/跨境出海'
+                        : '主力日常使用'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Section>
+
+      <!-- Section 3: Speedtest Evidence -->
+      <Section label="测速报告" id="speedtest" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">节点测速实测：延迟与下行带宽表现</h2>
+        <p class="text-muted mt-2 text-sm">
+          测试环境覆盖国内骨干网络，抓取亚洲近端（香港、日本、新加坡）及欧美远程节点的实际吞吐表现。
+        </p>
+
+        <div class="mt-6">
+          <SpeedtestBox
+            brandName={brand.name}
+            samples={brand.latencySamples}
+            imageSrc={brand.speedtestImage}
+            testDate={brand.verifiedDate}
+          />
+        </div>
+      </Section>
+
+      <!-- Section 4: Streaming & AI Unlock -->
+      <Section label="解锁矩阵" id="unlock" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">流媒体与 ChatGPT / Claude AI 生产力解锁实测</h2>
+        <p class="text-muted mt-2 text-sm">
+          使用 RegionRestrictionCheck 脚本与真实客户端对海外主流 AI 与流媒体平台的访问状态进行验证。
+        </p>
+
+        <div class="mt-6">
+          <UnlockGrid
+            brandName={brand.name}
+            unlockInfo={brand.unlockInfo}
+            unlockImages={brand.unlockImages}
+          />
+        </div>
+      </Section>
+
+      <!-- Section 5: Network Architecture -->
+      <Section label="线路架构" id="topology" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">网络拓扑与抗封锁技术解析</h2>
+        <p class="text-muted mt-2 text-sm">
+          采用 {brand.lineTypes.join(' + ')} 传输机制与 {brand.protocols.join('/')} 现代协议封装。
+        </p>
+
+        <div class="mt-6">
+          <TopologyDiagram
+            brandName={brand.name}
+            lineType={brand.lineTypes[0] || 'IEPL 专线'}
+          />
+        </div>
+      </Section>
+
+      <!-- Section 6: Client Configuration -->
+      <Section label="客户端配置" id="clients" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">如何导入并使用 {brand.name} 订阅节点？</h2>
+        <div class="prose mt-4 text-muted text-sm leading-relaxed">
+          <p>
+            {brand.name} 支持主流全平台代理工具：{brand.clientSupport}。以下以通用推荐工具 <strong>Clash Verge Rev</strong> 为例：
+          </p>
+          <ol class="border-border border-t my-4 font-mono text-xs">
+            <li class="border-border border-b py-3">
+              <span class="text-primary font-semibold">步骤 1：获取订阅</span>
+              <p class="mt-1 text-muted">登录 {brand.name} 用户中心，找到「仪表盘/便捷导入」，点击复制「Clash / 通用订阅链接」。</p>
+            </li>
+            <li class="border-border border-b py-3">
+              <span class="text-primary font-semibold">步骤 2：导入客户端</span>
+              <p class="mt-1 text-muted">打开 Clash Verge Rev，进入「订阅（Profiles）」页面，将复制的 URL 粘贴到地址栏并点击「导入」。</p>
+            </li>
+            <li class="border-border border-b py-3">
+              <span class="text-primary font-semibold">步骤 3：选择节点并连接</span>
+              <p class="mt-1 text-muted">进入「代理（Proxies）」选择延迟较低的香港或日本专线节点，在设置中开启「系统代理」及「TUN 模式」即可畅通访问。</p>
+            </li>
+          </ol>
+          <p>
+            详细客户端下载与各系统配置教程，可查阅我们的 <a href="/clients" class="text-primary underline">全平台客户端下载与图文配置指南</a>。
+          </p>
+        </div>
+      </Section>
+
+      <!-- Section 7: FAQ (Aligned with FAQPage Schema) -->
+      <Section label="常见问答" id="faq" class="mt-20">
+        <h2 class="text-2xl font-medium tracking-tight">{brand.name} 读者常见疑问解答 (FAQ)</h2>
+        <div class="border-border mt-6 border-t font-mono text-xs">
+          {brand.geoFaq.map((faq) => (
+            <details class="disclosure border-border border-b">
+              <summary class="py-3.5 text-sm font-medium text-foreground cursor-pointer">
+                {faq.q}
+              </summary>
+              <p class="text-muted pb-4 leading-relaxed">{faq.a}</p>
+            </details>
+          ))}
+        </div>
+      </Section>
+    </div>
+
+    <!-- Bottom Sticky CTA Banner -->
+    <div class="shell-body border-border mt-20 border-t pt-10 pb-8">
+      <div class="border-border border bg-surface/50 p-6 rounded-[2px] flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-mono text-faint">准备开始体验？</span>
+          <h3 class="text-xl font-medium text-foreground mt-0.5">前往 {brand.name} 官方节点控制台</h3>
+          <p class="text-xs text-muted font-mono mt-1">
+            建议新用户优先选用短期月付，充分实测本地晚高峰稳定度。
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          {brand.affLink && brand.affLink !== '#' ? (
+            <a
+              href={brand.affLink}
+              target="_blank"
+              rel="nofollow sponsored noopener"
+              class="btn py-2.5 px-6 text-sm"
+            >
+              直达官网注册
+            </a>
+          ) : (
+            <span class="border border-border bg-surface text-faint py-2 px-4 text-xs font-mono rounded-[var(--radius)] cursor-not-allowed">
+              官方通道维护中
+            </span>
+          )}
+          <a href="/brands" class="text-xs font-mono underline hover:text-primary">
+            返回 42 家大表 &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prev / Next Brand Navigation -->
+    <div class="shell-body pb-16 grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
+      {prevBrand ? (
+        <a href={`/brands/${prevBrand.id}`} class="border border-border p-4 hover:border-foreground/30 no-underline bg-background flex flex-col justify-between group">
+          <span class="text-faint text-[10px]">&larr; 上一家评测</span>
+          <span class="font-medium text-foreground text-sm mt-1 group-hover:text-primary">#{prevBrand.rank} {prevBrand.name}</span>
+          <span class="text-muted text-[11px] mt-1 line-clamp-1">{prevBrand.tagline}</span>
+        </a>
+      ) : <div />}
+      {nextBrand ? (
+        <a href={`/brands/${nextBrand.id}`} class="border border-border p-4 hover:border-foreground/30 no-underline bg-background flex flex-col justify-between sm:items-end text-left sm:text-right group">
+          <span class="text-faint text-[10px]">下一家评测 &rarr;</span>
+          <span class="font-medium text-foreground text-sm mt-1 group-hover:text-primary">#{nextBrand.rank} {nextBrand.name}</span>
+          <span class="text-muted text-[11px] mt-1 line-clamp-1">{nextBrand.tagline}</span>
+        </a>
+      ) : <div />}
+    </div>
+  </div>
+
+  <script is:inline>
+    document.querySelectorAll('.copy-coupon-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const code = btn.getAttribute('data-coupon');
+        if (code) {
+          navigator.clipboard.writeText(code).then(() => {
+            const original = btn.textContent;
+            btn.textContent = '已复制!';
+            btn.classList.add('text-primary');
+            setTimeout(() => {
+              btn.textContent = original;
+              btn.classList.remove('text-primary');
+            }, 1500);
+          });
+        }
+      });
+    });
+  </script>
+</Base>

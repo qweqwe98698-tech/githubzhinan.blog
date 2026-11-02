@@ -63,18 +63,33 @@ export default defineConfig({
   site: process.env.SITE_URL ?? site.url,
   integrations: [
     mdx(),
-    sitemap({ filter: (page) => !page.endsWith('/styleguide/') }),
+    sitemap({
+      filter: (page) => !page.endsWith('/styleguide/') && !page.includes('/blog/tag/'),
+    }),
     icon(),
     {
       name: 'theme-styleguide',
       hooks: {
         'astro:config:setup': ({ command, injectRoute }) => {
-          // Demo builds only (the demo bar links to it): the changelog as a page
-          if (process.env.PUBLIC_DEMO_BUY_URL)
-            injectRoute({ pattern: '/whats-new', entrypoint: './src/pages/_whats-new.astro' });
-          // Dev only: the styleguide is a design tool, not a page buyers ship.
+          // Dev only: the styleguide is a design tool.
           if (command === 'dev')
             injectRoute({ pattern: '/styleguide', entrypoint: './src/pages/_styleguide.astro' });
+        },
+      },
+    },
+    {
+      name: 'sitemap-alias',
+      hooks: {
+        'astro:build:done': async ({ dir }) => {
+          const fs = await import('node:fs');
+          const { fileURLToPath } = await import('node:url');
+          const path = await import('node:path');
+          const outDir = fileURLToPath(dir);
+          const indexPath = path.join(outDir, 'sitemap-index.xml');
+          const targetPath = path.join(outDir, 'sitemap.xml');
+          if (fs.existsSync(indexPath)) {
+            fs.copyFileSync(indexPath, targetPath);
+          }
         },
       },
     },

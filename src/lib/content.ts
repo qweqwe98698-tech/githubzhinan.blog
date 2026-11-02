@@ -55,4 +55,8 @@ export const getTags = async () => {
 };
 
 /** Slug for a tag URL. Tags are free text, so they are not URL-safe on their own. */
-export const tagSlug = (tag: string) => tag.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+export const tagSlug = (tag: string) =>
+  tag
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-+|-+$/g, '') || 'tag';

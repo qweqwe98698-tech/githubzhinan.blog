@@ -3,7 +3,6 @@ import type { ComponentProps } from 'astro/types';
 import { Font } from 'astro:assets';
 import '../styles/global.css';
 import SEO from '../components/common/SEO.astro';
-import DemoBar from '../components/common/DemoBar.astro';
 import Header from '../components/common/Header.astro';
 import Footer from '../components/common/Footer.astro';
 import Analytics from '../components/common/Analytics.astro';
@@ -49,7 +48,6 @@ const seo = Astro.props;
     >
       {ui.skipToContent}
     </a>
-    <DemoBar />
     <Header />
     <main id="main" tabindex="-1" class="flex-1 outline-none">
       <slot />

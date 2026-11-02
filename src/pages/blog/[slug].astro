@@ -30,7 +30,16 @@ const jsonLd = [
 ];
 ---
 
-<Base title={title} description={description} type="article" jsonLd={jsonLd}>
+<Base
+  title={title}
+  description={description}
+  type="article"
+  publishedTime={isoDate(pubDate)}
+  modifiedTime={updatedDate ? isoDate(updatedDate) : isoDate(pubDate)}
+  author={author ?? site.author}
+  tags={tags}
+  jsonLd={jsonLd}
+>
   {remarkPluginFrontmatter.hasMath && <link slot="head" rel="stylesheet" href={katexCss} />}
   <div class="shell">
     <article class="shell-body pt-14 pb-20 sm:pt-20">

@@ -18,7 +18,7 @@ export const getStaticPaths = (async () => {
 const { tag, posts } = Astro.props;
 ---
 
-<Base title={`${tag}`} description={ui.blog.tagDescription(tag)}>
+<Base title={`${tag}`} description={ui.blog.tagDescription(tag)} noindex={true}>
   <div class="shell">
     <div class="shell-body pt-14 pb-20 sm:pt-20">
       <p class="text-faint font-mono text-[11px]">{ui.blog.tag}</p>
